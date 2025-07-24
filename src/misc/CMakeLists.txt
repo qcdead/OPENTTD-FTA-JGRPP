@@ -1,0 +1,9 @@
+add_files(
+    binaryheap.hpp
+    dbg_helpers.cpp
+    dbg_helpers.h
+    getoptdata.cpp
+    getoptdata.h
+    hashtable.hpp
+    lrucache.hpp
+)
