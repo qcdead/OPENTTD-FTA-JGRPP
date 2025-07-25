@@ -360,19 +360,22 @@ struct CompanyFinancesWindow : Window {
 				SetDParam(1, (CompanyID)this->window_number);
 				break;
 
-			case WID_CF_BALANCE_VALUE: {
+			case WID_CF_BALANCE_VALUE:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				SetDParam(0, c->money);
 				break;
 			}
 
-			case WID_CF_LOAN_VALUE: {
+			case WID_CF_LOAN_VALUE:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				SetDParam(0, c->current_loan);
 				break;
 			}
 
-			case WID_CF_OWN_VALUE: {
+			case WID_CF_OWN_VALUE:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				SetDParam(0, c->money - c->current_loan);
 				break;
@@ -382,7 +385,8 @@ struct CompanyFinancesWindow : Window {
 				SetDParam(0, _settings_game.difficulty.initial_interest);
 				break;
 
-			case WID_CF_MAXLOAN_VALUE: {
+			case WID_CF_MAXLOAN_VALUE:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				SetDParam(0, c->GetMaxLoan());
 				break;
@@ -399,7 +403,7 @@ struct CompanyFinancesWindow : Window {
 	{
 		switch (widget) {
 			case WID_CF_EXPS_CATEGORY:
-				size.width  = GetMaxCategoriesWidth();
+				size.width = GetMaxCategoriesWidth();
 				size.height = GetTotalCategoriesHeight();
 				break;
 
@@ -431,13 +435,14 @@ struct CompanyFinancesWindow : Window {
 
 			case WID_CF_EXPS_PRICE1:
 			case WID_CF_EXPS_PRICE2:
-			case WID_CF_EXPS_PRICE3: {
+			case WID_CF_EXPS_PRICE3:
+			{
 				int period = widget - WID_CF_EXPS_PRICE1;
 				if (period < this->first_visible) break;
 
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				const auto &expenses = c->yearly_expenses[NUM_PERIODS - period - 1];
-				DrawYearColumn(r, EconTime::YearToDisplay(EconTime::CurYear() - EconTime::YearDelta{NUM_PERIODS - period - 1}), expenses);
+				DrawYearColumn(r, EconTime::YearToDisplay(EconTime::CurYear() - EconTime::YearDelta{ NUM_PERIODS - period - 1 }), expenses);
 				break;
 			}
 
@@ -579,13 +584,15 @@ struct CompanyFinancesWindow : Window {
 	bool OnTooltip(Point pt, WidgetID widget, TooltipCloseCondition close_cond) override
 	{
 		switch (widget) {
-			case WID_CF_INCREASE_LOAN: {
+			case WID_CF_INCREASE_LOAN:
+			{
 				SetDParam(0, STR_FINANCES_BORROW_TOOLTIP);
 				GuiShowTooltips(this, STR_FINANCES_BORROW_TOOLTIP_EXTRA, close_cond, 1);
 				return true;
 			}
 
-			case WID_CF_REPAY_LOAN: {
+			case WID_CF_REPAY_LOAN:
+			{
 				SetDParam(0, STR_FINANCES_REPAY_TOOLTIP);
 				GuiShowTooltips(this, STR_FINANCES_REPAY_TOOLTIP_EXTRA, close_cond, 1);
 				return true;
@@ -634,7 +641,7 @@ static const LiveryClass _livery_class[LS_END] = {
 template <SpriteID TSprite = SPR_SQUARE>
 class DropDownListColourItem : public DropDownIcon<DropDownString<DropDownListItem>> {
 public:
-	DropDownListColourItem(int colour, bool masked) : DropDownIcon<DropDownString<DropDownListItem>>(TSprite, GENERAL_SPRITE_COLOUR(colour % COLOUR_END), colour < COLOUR_END ? (STR_COLOUR_DARK_BLUE + colour) : STR_COLOUR_DEFAULT, colour, masked)
+	DropDownListColourItem(int colour, bool masked) : DropDownIcon<DropDownString<DropDownListItem>>(TSprite, GENERAL_SPRITE_COLOUR(colour %COLOUR_END), colour < COLOUR_END ? (STR_COLOUR_DARK_BLUE + colour) : STR_COLOUR_DEFAULT, colour, masked)
 	{
 	}
 };
@@ -658,11 +665,11 @@ private:
 		uint8_t default_col = 0;
 
 		/* Disallow other company colours for the primary colour */
-		//if (this->livery_class < LC_GROUP_RAIL && HasBit(this->sel, LS_DEFAULT) && primary) {
-		//	for (const Company *c : Company::Iterate()) {
-		//		if (c->index != _local_company) SetBit(used_colours, c->colour);
-		//	}
-		//}
+//		if (this->livery_class < LC_GROUP_RAIL && HasBit(this->sel, LS_DEFAULT) && primary) {
+//			for (const Company *c : Company::Iterate()) {
+//				if (c->index != _local_company) SetBit(used_colours, c->colour);
+//			}
+//		}
 
 		const Company *c = Company::Get((CompanyID)this->window_number);
 
@@ -787,9 +794,10 @@ public:
 	void UpdateWidgetSize(WidgetID widget, Dimension &size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension &fill, [[maybe_unused]] Dimension &resize) override
 	{
 		switch (widget) {
-			case WID_SCL_SPACER_DROPDOWN: {
-				/* The matrix widget below needs enough room to print all the schemes. */
-				Dimension d = {0, 0};
+			case WID_SCL_SPACER_DROPDOWN:
+			{
+/* The matrix widget below needs enough room to print all the schemes. */
+				Dimension d = { 0, 0 };
 				for (LiveryScheme scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
 					d = maxdim(d, GetStringBoundingBox(STR_LIVERY_DEFAULT + scheme));
 				}
@@ -806,8 +814,9 @@ public:
 				break;
 			}
 
-			case WID_SCL_MATRIX: {
-				/* 11 items in the default rail class */
+			case WID_SCL_MATRIX:
+			{
+/* 11 items in the default rail class */
 				this->square = GetSpriteSize(SPR_SQUARE);
 				this->line_height = std::max(this->square.height, (uint)GetCharacterHeight(FS_NORMAL)) + padding.height;
 
@@ -824,7 +833,8 @@ public:
 				}
 				[[fallthrough]];
 
-			case WID_SCL_PRI_COL_DROPDOWN: {
+			case WID_SCL_PRI_COL_DROPDOWN:
+			{
 				this->square = GetSpriteSize(SPR_SQUARE);
 				int string_padding = this->square.width + WidgetDimensions::scaled.hsep_normal + padding.width;
 				for (Colours colour = COLOUR_BEGIN; colour != COLOUR_END; colour++) {
@@ -858,7 +868,8 @@ public:
 				break;
 
 			case WID_SCL_PRI_COL_DROPDOWN:
-			case WID_SCL_SEC_COL_DROPDOWN: {
+			case WID_SCL_SEC_COL_DROPDOWN:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				bool primary = widget == WID_SCL_PRI_COL_DROPDOWN;
 				StringID colour = STR_COLOUR_DEFAULT;
@@ -914,7 +925,7 @@ public:
 
 		Rect ir = r.WithHeight(this->resize.step_height).Shrink(WidgetDimensions::scaled.matrix);
 		int square_offs = (ir.Height() - this->square.height) / 2;
-		int text_offs   = (ir.Height() - GetCharacterHeight(FS_NORMAL)) / 2;
+		int text_offs = (ir.Height() - GetCharacterHeight(FS_NORMAL)) / 2;
 
 		int y = ir.top;
 
@@ -1010,7 +1021,8 @@ public:
 				ShowColourDropDownMenu(WID_SCL_SEC_COL_DROPDOWN);
 				break;
 
-			case WID_SCL_MATRIX: {
+			case WID_SCL_MATRIX:
+			{
 				if (this->livery_class < LC_GROUP_RAIL) {
 					uint row = this->vscroll->GetScrolledRowFromWidget(pt.y, this, widget);
 					if (row >= this->rows) return;
@@ -1107,7 +1119,7 @@ public:
 		}
 
 		if (!current_class_valid) {
-			Point pt = {0, 0};
+			Point pt = { 0, 0 };
 			this->OnClick(pt, WID_SCL_CLASS_GENERAL, 1);
 		}
 	}
@@ -1177,9 +1189,9 @@ void DrawCompanyManagerFace(CompanyManagerFace cmf, Colours colour, const Rect &
 	int x = CenterBounds(r.left, r.right, d.width);
 	int y = CenterBounds(r.top, r.bottom, d.height);
 
-	bool has_moustache   = !HasBit(ge, GENDER_FEMALE) && GetCompanyManagerFaceBits(cmf, CMFV_HAS_MOUSTACHE,   ge) != 0;
+	bool has_moustache = !HasBit(ge, GENDER_FEMALE) && GetCompanyManagerFaceBits(cmf, CMFV_HAS_MOUSTACHE, ge) != 0;
 	bool has_tie_earring = !HasBit(ge, GENDER_FEMALE) || GetCompanyManagerFaceBits(cmf, CMFV_HAS_TIE_EARRING, ge) != 0;
-	bool has_glasses     = GetCompanyManagerFaceBits(cmf, CMFV_HAS_GLASSES, ge) != 0;
+	bool has_glasses = GetCompanyManagerFaceBits(cmf, CMFV_HAS_GLASSES, ge) != 0;
 	PaletteID pal;
 
 	/* Modify eye colour palette only if 2 or more valid values exist */
@@ -1195,7 +1207,7 @@ void DrawCompanyManagerFace(CompanyManagerFace cmf, Colours colour, const Rect &
 	}
 
 	/* Draw the gradient (background) */
-	DrawSprite(SPR_GRADIENT, GENERAL_SPRITE_COLOUR(colour%16), x, y);
+	DrawSprite(SPR_GRADIENT, GENERAL_SPRITE_COLOUR(colour), x, y);
 
 	for (CompanyManagerFaceVariable cmfv = CMFV_CHEEKS; cmfv < CMFV_END; cmfv++) {
 		switch (cmfv) {
@@ -1368,8 +1380,7 @@ static constexpr NWidgetPart _nested_select_company_manager_face_widgets[] = {
 };
 
 /** Management class for customizing the face of the company manager. */
-class SelectCompanyManagerFaceWindow : public Window
-{
+class SelectCompanyManagerFaceWindow : public Window {
 	CompanyManagerFace face; ///< company manager face bits
 	bool advanced; ///< advanced company manager face selection window
 
@@ -1452,10 +1463,10 @@ public:
 	{
 		/* Size of the boolean yes/no button. */
 		Dimension yesno_dim = maxdim(GetStringBoundingBox(STR_FACE_YES), GetStringBoundingBox(STR_FACE_NO));
-		yesno_dim.width  += WidgetDimensions::scaled.framerect.Horizontal();
+		yesno_dim.width += WidgetDimensions::scaled.framerect.Horizontal();
 		yesno_dim.height += WidgetDimensions::scaled.framerect.Vertical();
 		/* Size of the number button + arrows. */
-		Dimension number_dim = {0, 0};
+		Dimension number_dim = { 0, 0 };
 		for (int val = 1; val <= 12; val++) {
 			SetDParam(0, val);
 			number_dim = maxdim(number_dim, GetStringBoundingBox(STR_JUST_INT));
@@ -1517,13 +1528,13 @@ public:
 	{
 		/* lower the non-selected gender button */
 		this->SetWidgetsLoweredState(!this->is_female, WID_SCMF_MALE, WID_SCMF_MALE2);
-		this->SetWidgetsLoweredState( this->is_female, WID_SCMF_FEMALE, WID_SCMF_FEMALE2);
+		this->SetWidgetsLoweredState(this->is_female, WID_SCMF_FEMALE, WID_SCMF_FEMALE2);
 
 		/* advanced company manager face selection window */
 
 		/* lower the non-selected ethnicity button */
 		this->SetWidgetLoweredState(WID_SCMF_ETHNICITY_EUR, !HasBit(this->ge, ETHNICITY_BLACK));
-		this->SetWidgetLoweredState(WID_SCMF_ETHNICITY_AFR,  HasBit(this->ge, ETHNICITY_BLACK));
+		this->SetWidgetLoweredState(WID_SCMF_ETHNICITY_AFR, HasBit(this->ge, ETHNICITY_BLACK));
 
 
 		/* Disable dynamically the widgets which CompanyManagerFaceVariable has less than 2 options
@@ -1581,7 +1592,7 @@ public:
 				if (this->is_female) { // Only for female faces
 					this->SetFaceStringParameters(WID_SCMF_HAS_MOUSTACHE_EARRING, GetCompanyManagerFaceBits(this->face, CMFV_HAS_TIE_EARRING, this->ge), true);
 				} else { // Only for male faces
-					this->SetFaceStringParameters(WID_SCMF_HAS_MOUSTACHE_EARRING, GetCompanyManagerFaceBits(this->face, CMFV_HAS_MOUSTACHE,   this->ge), true);
+					this->SetFaceStringParameters(WID_SCMF_HAS_MOUSTACHE_EARRING, GetCompanyManagerFaceBits(this->face, CMFV_HAS_MOUSTACHE, this->ge), true);
 				}
 				break;
 
@@ -1593,44 +1604,44 @@ public:
 				if (this->is_moust_male) { // Only for male faces with moustache
 					this->SetFaceStringParameters(WID_SCMF_LIPS_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_MOUSTACHE, this->ge), false);
 				} else { // Only for female faces or male faces without moustache
-					this->SetFaceStringParameters(WID_SCMF_LIPS_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_LIPS,      this->ge), false);
+					this->SetFaceStringParameters(WID_SCMF_LIPS_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_LIPS, this->ge), false);
 				}
 				break;
 
 			case WID_SCMF_HAS_GLASSES:
-				this->SetFaceStringParameters(WID_SCMF_HAS_GLASSES, GetCompanyManagerFaceBits(this->face, CMFV_HAS_GLASSES, this->ge), true );
+				this->SetFaceStringParameters(WID_SCMF_HAS_GLASSES, GetCompanyManagerFaceBits(this->face, CMFV_HAS_GLASSES, this->ge), true);
 				break;
 
 			case WID_SCMF_HAIR:
-				this->SetFaceStringParameters(WID_SCMF_HAIR,        GetCompanyManagerFaceBits(this->face, CMFV_HAIR,        this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_HAIR, GetCompanyManagerFaceBits(this->face, CMFV_HAIR, this->ge), false);
 				break;
 
 			case WID_SCMF_EYEBROWS:
-				this->SetFaceStringParameters(WID_SCMF_EYEBROWS,    GetCompanyManagerFaceBits(this->face, CMFV_EYEBROWS,    this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_EYEBROWS, GetCompanyManagerFaceBits(this->face, CMFV_EYEBROWS, this->ge), false);
 				break;
 
 			case WID_SCMF_EYECOLOUR:
-				this->SetFaceStringParameters(WID_SCMF_EYECOLOUR,   GetCompanyManagerFaceBits(this->face, CMFV_EYE_COLOUR,  this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_EYECOLOUR, GetCompanyManagerFaceBits(this->face, CMFV_EYE_COLOUR, this->ge), false);
 				break;
 
 			case WID_SCMF_GLASSES:
-				this->SetFaceStringParameters(WID_SCMF_GLASSES,     GetCompanyManagerFaceBits(this->face, CMFV_GLASSES,     this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_GLASSES, GetCompanyManagerFaceBits(this->face, CMFV_GLASSES, this->ge), false);
 				break;
 
 			case WID_SCMF_NOSE:
-				this->SetFaceStringParameters(WID_SCMF_NOSE,        GetCompanyManagerFaceBits(this->face, CMFV_NOSE,        this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_NOSE, GetCompanyManagerFaceBits(this->face, CMFV_NOSE, this->ge), false);
 				break;
 
 			case WID_SCMF_CHIN:
-				this->SetFaceStringParameters(WID_SCMF_CHIN,        GetCompanyManagerFaceBits(this->face, CMFV_CHIN,        this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_CHIN, GetCompanyManagerFaceBits(this->face, CMFV_CHIN, this->ge), false);
 				break;
 
 			case WID_SCMF_JACKET:
-				this->SetFaceStringParameters(WID_SCMF_JACKET,      GetCompanyManagerFaceBits(this->face, CMFV_JACKET,      this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_JACKET, GetCompanyManagerFaceBits(this->face, CMFV_JACKET, this->ge), false);
 				break;
 
 			case WID_SCMF_COLLAR:
-				this->SetFaceStringParameters(WID_SCMF_COLLAR,      GetCompanyManagerFaceBits(this->face, CMFV_COLLAR,      this->ge), false);
+				this->SetFaceStringParameters(WID_SCMF_COLLAR, GetCompanyManagerFaceBits(this->face, CMFV_COLLAR, this->ge), false);
 				break;
 		}
 	}
@@ -1815,8 +1826,7 @@ static constexpr NWidgetPart _nested_company_infrastructure_widgets[] = {
 /**
  * Window with detailed information about the company's infrastructure.
  */
-struct CompanyInfrastructureWindow : Window
-{
+struct CompanyInfrastructureWindow : Window {
 	RailTypes railtypes; ///< Valid railtypes.
 	RoadTypes roadtypes; ///< Valid roadtypes.
 
@@ -1903,7 +1913,8 @@ struct CompanyInfrastructureWindow : Window
 		const Company *c = Company::Get((CompanyID)this->window_number);
 
 		switch (widget) {
-			case WID_CI_DESC: {
+			case WID_CI_DESC:
+			{
 				uint rail_lines = 1; // Starts at 1 because a line is also required for the section title
 
 				size.width = std::max(size.width, GetStringBoundingBox(STR_COMPANY_INFRASTRUCTURE_VIEW_RAIL_SECT).width);
@@ -1958,8 +1969,9 @@ struct CompanyInfrastructureWindow : Window
 				break;
 			}
 
-			case WID_CI_COUNT: {
-				/* Find the maximum count that is displayed. */
+			case WID_CI_COUNT:
+			{
+/* Find the maximum count that is displayed. */
 				uint32_t max_val = 1000;  // Some random number to reserve enough space.
 				Money max_cost = 10000; // Some random number to reserve enough space.
 				uint32_t rail_total = c->infrastructure.GetRailTotal();
@@ -2040,7 +2052,8 @@ struct CompanyInfrastructureWindow : Window
 		int y = -this->vscroll->GetPosition();
 
 		switch (widget) {
-			case WID_CI_DESC: {
+			case WID_CI_DESC:
+			{
 				DrawString(0, width, y, STR_COMPANY_INFRASTRUCTURE_VIEW_RAIL_SECT);
 
 				if (this->railtypes != RAILTYPES_NONE) {
@@ -2094,8 +2107,9 @@ struct CompanyInfrastructureWindow : Window
 				break;
 			}
 
-			case WID_CI_COUNT: {
-				/* Draw infrastructure count for each valid railtype. */
+			case WID_CI_COUNT:
+			{
+/* Draw infrastructure count for each valid railtype. */
 				uint32_t rail_total = c->infrastructure.GetRailTotal();
 				for (const auto &rt : _sorted_railtypes) {
 					if (HasBit(this->railtypes, rt)) {
@@ -2268,13 +2282,15 @@ static constexpr NWidgetPart _nested_company_widgets[] = {
 	EndContainer(),
 	/* Button bars at the bottom. */
 	NWidget(NWID_SELECTION, INVALID_COLOUR, WID_C_SELECT_BUTTONS),
-		NWidget(NWID_VERTICAL),
-			NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_NEW_FACE), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_NEW_FACE_BUTTON, STR_COMPANY_VIEW_NEW_FACE_TOOLTIP),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_COLOUR_SCHEME), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON, STR_COMPANY_VIEW_COLOUR_SCHEME_TOOLTIP),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_PRESIDENT_NAME), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON, STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_COMPANY_NAME), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_COMPANY_NAME_BUTTON, STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP),
-			EndContainer(),
+		NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_NEW_FACE), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_NEW_FACE_BUTTON, STR_COMPANY_VIEW_NEW_FACE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_COLOUR_SCHEME), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON, STR_COMPANY_VIEW_COLOUR_SCHEME_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_PRESIDENT_NAME), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON, STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_COMPANY_NAME), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_COMPANY_NAME_BUTTON, STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP),
+		EndContainer(),
+		NWidget(NWID_HORIZONTAL, NWidContainerFlag::EqualSize),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_BUY_SHARE), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_BUY_SHARE_BUTTON, STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_C_SELL_SHARE), SetFill(1, 0), SetStringTip(STR_COMPANY_VIEW_SELL_SHARE_BUTTON, STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP),
 		EndContainer(),
 	EndContainer(),
 };
@@ -2282,9 +2298,9 @@ static constexpr NWidgetPart _nested_company_widgets[] = {
 int GetAmountOwnedBy(const Company *c, Owner owner)
 {
 	return (c->share_owners[0] == owner) +
-				 (c->share_owners[1] == owner) +
-				 (c->share_owners[2] == owner) +
-				 (c->share_owners[3] == owner);
+		(c->share_owners[1] == owner) +
+		(c->share_owners[2] == owner) +
+		(c->share_owners[3] == owner);
 }
 
 /** Strings for the company vehicle counts */
@@ -2295,8 +2311,7 @@ static const StringID _company_view_vehicle_count_strings[] = {
 /**
  * Window with general information about a company
  */
-struct CompanyWindow : Window
-{
+struct CompanyWindow : Window {
 	CompanyWidgets query_widget;
 
 	/** Display planes in the company window. */
@@ -2383,7 +2398,8 @@ struct CompanyWindow : Window
 				size = maxdim(size, GetScaledSpriteSize(SPR_GRADIENT));
 				break;
 
-			case WID_C_DESC_COLOUR_SCHEME_EXAMPLE: {
+			case WID_C_DESC_COLOUR_SCHEME_EXAMPLE:
+			{
 				Point offset;
 				Dimension d = GetSpriteSize(SPR_VEH_BUS_SW_VIEW, &offset);
 				d.width -= offset.x;
@@ -2396,17 +2412,6 @@ struct CompanyWindow : Window
 				SetDParam(0, INT64_MAX); // Arguably the maximum company value
 				size.width = GetStringBoundingBox(STR_COMPANY_VIEW_COMPANY_VALUE).width;
 				break;
-			
-			case WID_C_DESC_SHARES_COSTS: {
-				std::string res;
-				SetDParam(0, INT64_MAX); // Arguably the maximum company value
-				res += "(+";
-				SetDParam(0, INT64_MAX);
-				res += GetString(STR_FINANCES_ZERO_INCOME);
-				res += " tax)";
-				SetDParamStr(0, res);
-				break;
-			}
 
 			case WID_C_DESC_VEHICLE_COUNTS:
 				SetDParamMaxValue(0, 5000); // Maximum number of vehicles
@@ -2426,7 +2431,8 @@ struct CompanyWindow : Window
 				size.width += padding.width;
 				break;
 
-			case WID_C_DESC_OWNERS: {
+			case WID_C_DESC_OWNERS:
+			{
 				for (const Company *c2 : Company::Iterate()) {
 					SetDParamMaxValue(0, 75);
 					SetDParam(1, c2->index);
@@ -2538,7 +2544,8 @@ struct CompanyWindow : Window
 				DrawStringMultiLine(r.left, r.right, r.top, r.bottom, STR_COMPANY_VIEW_PRESIDENT_MANAGER_TITLE, TC_FROMSTRING, SA_HOR_CENTER);
 				break;
 
-			case WID_C_DESC_COLOUR_SCHEME_EXAMPLE: {
+			case WID_C_DESC_COLOUR_SCHEME_EXAMPLE:
+			{
 				Point offset;
 				Dimension d = GetSpriteSize(SPR_VEH_BUS_SW_VIEW, &offset);
 				d.height -= offset.y;
@@ -2554,13 +2561,14 @@ struct CompanyWindow : Window
 				DrawInfrastructureCountsWidget(r, c);
 				break;
 
-			case WID_C_DESC_OWNERS: {
+			case WID_C_DESC_OWNERS:
+			{
 				uint y = r.top;
 
 				for (const Company *c2 : Company::Iterate()) {
 					uint amt = GetAmountOwnedBy(c, c2->index);
 					if (amt != 0) {
-						SetDParam(0, amt * (100.0f/MAX_COMPANY_SHARE_OWNERS));
+						SetDParam(0, amt * (100.0f / MAX_COMPANY_SHARE_OWNERS));
 						SetDParam(1, c2->index);
 
 						DrawString(r.left, r.right, y, STR_COMPANY_VIEW_SHARES_OWNED_BY);
@@ -2586,9 +2594,10 @@ struct CompanyWindow : Window
 				SetDParam(1, (CompanyID)this->window_number);
 				break;
 
-			case WID_C_DESC_INAUGURATION: {
+			case WID_C_DESC_INAUGURATION:
+			{
 				const Company *c = Company::Get(static_cast<CompanyID>(this->window_number));
-				if (EconTime::UsingWallclockUnits() ) {
+				if (EconTime::UsingWallclockUnits()) {
 					SetDParam(0, STR_COMPANY_VIEW_INAUGURATED_TITLE_WALLCLOCK);
 					SetDParam(1, c->inaugurated_year);
 					SetDParam(2, c->display_inaugurated_period);
@@ -2602,17 +2611,6 @@ struct CompanyWindow : Window
 			case WID_C_DESC_COMPANY_VALUE:
 				SetDParam(0, CalculateCompanyValue(Company::Get((CompanyID)this->window_number)));
 				break;
-							case WID_C_DESC_SHARES_COSTS: {
-				static std::string res;
-				Money price = CalculateCompanyValue(Company::Get((CompanyID)this->window_number));
-				SetDParam(0, price); // Arguably the maximum company value
-				res += "(+";
-				SetDParam(0, (float)price);
-				res += GetString(STR_FINANCES_ZERO_INCOME);
-				res += " tax)";
-				SetDParamStr(0, res);
-				break;
-			}
 		}
 	}
 
@@ -2643,7 +2641,8 @@ struct CompanyWindow : Window
 				ShowQueryString(GetString(STR_COMPANY_NAME, this->window_number), STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION, MAX_LENGTH_COMPANY_NAME_CHARS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT | QSF_LEN_IN_CHARS);
 				break;
 
-			case WID_C_VIEW_HQ: {
+			case WID_C_VIEW_HQ:
+			{
 				TileIndex tile = Company::Get((CompanyID)this->window_number)->location_of_HQ;
 				if (_ctrl_pressed) {
 					ShowExtraViewportWindow(tile);
@@ -2690,10 +2689,6 @@ struct CompanyWindow : Window
 			case WID_C_BUY_SHARE:
 				Command<CMD_BUY_SHARE_IN_COMPANY>::Post(STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS, (CompanyID)this->window_number);
 				break;
-			
-			case WID_C_BUY_BACK_SHARE:
-				Command<CMD_BUY_SHARE_IN_COMPANY>::Post(STR_ERROR_CAN_T_BUY_25_SHARE_IN_THIS, (CompanyID)this->window_number);
-				break;
 
 			case WID_C_SELL_SHARE:
 				Command<CMD_SELL_SHARE_IN_COMPANY>::Post(STR_ERROR_CAN_T_SELL_25_SHARE_IN, (CompanyID)this->window_number);
@@ -2704,15 +2699,11 @@ struct CompanyWindow : Window
 				break;
 
 			case WID_C_COMPANY_PASSWORD:
-		if (this->window_number == _local_company) {
-			const Company *c = Company::Get(this->window_number);
-			this->SetWidgetDisabledState(WID_C_BUY_BACK_SHARE, (GetAmountOwnedBy(c, INVALID_OWNER) == MAX_COMPANY_SHARE_OWNERS) ||
-					/* Spectators cannot do anything of course */
-					_local_company == COMPANY_SPECTATOR);
-			return;
-		}				break;
+				if (this->window_number == _local_company) ShowNetworkCompanyPasswordWindow(this);
+				break;
 
-			case WID_C_COMPANY_JOIN: {
+			case WID_C_COMPANY_JOIN:
+			{
 				this->query_widget = WID_C_COMPANY_JOIN;
 				CompanyID company = (CompanyID)this->window_number;
 				if (_network_server) {
@@ -2756,7 +2747,8 @@ struct CompanyWindow : Window
 		switch (this->query_widget) {
 			default: NOT_REACHED();
 
-			case WID_C_GIVE_MONEY: {
+			case WID_C_GIVE_MONEY:
+			{
 				Money money = std::strtoull(str->c_str(), nullptr, 10) / GetCurrency().rate;
 				Command<CMD_GIVE_MONEY>::Post(STR_ERROR_CAN_T_GIVE_MONEY, CommandCallback::GiveMoney, money, (CompanyID)this->window_number);
 				break;
@@ -2800,7 +2792,6 @@ struct CompanyWindow : Window
 						_local_company == COMPANY_SPECTATOR);
 			} else { // Shares are not allowed, disable buy/sell buttons
 				this->DisableWidget(WID_C_BUY_SHARE);
-				this->DisableWidget(WID_C_BUY_BACK_SHARE);
 				this->DisableWidget(WID_C_SELL_SHARE);
 			}
 		}
@@ -2896,13 +2887,15 @@ struct BuyCompanyWindow : Window {
 	void DrawWidget(const Rect &r, WidgetID widget) const override
 	{
 		switch (widget) {
-			case WID_BC_FACE: {
+			case WID_BC_FACE:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				DrawCompanyManagerFace(c->face, (Colours)c->colour, r);
 				break;
 			}
 
-			case WID_BC_QUESTION: {
+			case WID_BC_QUESTION:
+			{
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				SetDParam(0, c->index);
 				SetDParam(1, this->company_value);

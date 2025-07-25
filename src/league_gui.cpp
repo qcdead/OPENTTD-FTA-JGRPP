@@ -81,7 +81,7 @@ private:
 	}
 
 	/** Sort the company league by performance history */
-	static bool PerformanceSorter(const Company * const &c1, const Company * const &c2)
+	static bool PerformanceSorter(const Company *const &c1, const Company *const &c2)
 	{
 		return c2->old_economy[0].performance_history < c1->old_economy[0].performance_history;
 	}
@@ -101,6 +101,7 @@ public:
 	{
 		this->BuildCompanyList();
 		this->companies.Sort(&PerformanceSorter);
+
 		this->vscroll->SetCount(this->companies.size());
 		this->DrawWidgets();
 	}
@@ -116,14 +117,17 @@ public:
 		bool rtl = _current_text_dir == TD_RTL;
 		Rect ordinal = ir.WithWidth(this->ordinal_width, rtl);
 		uint icon_left = ir.Indent(rtl ? this->text_width : this->ordinal_width, rtl).left;
-		Rect text    = ir.WithWidth(this->text_width, !rtl);
+		Rect text = ir.WithWidth(this->text_width, !rtl);
 
 		uint count = std::min((size_t)this->vscroll->GetCapacity(), this->companies.size());
 		for (uint i = this->vscroll->GetPosition(), t = i + count; i != t; i++) {
 			const Company *c = this->companies[i];
 			SetDParam(0, i + 1);
-			DrawString(ordinal.left, ordinal.right, ir.top + text_y_offset, STR_COMPANY_LEAGUE_COMPANY_RANK);
-
+			if (i + STR_COMPANY_LEAGUE_COMPANY_RANK <= 15) {
+				DrawString(ordinal.left, ordinal.right, ir.top + text_y_offset, i + STR_COMPANY_LEAGUE_COMPANY_RANK, i == 0 ? TC_WHITE : TC_YELLOW);
+			} else {
+				DrawString(ordinal.left, ordinal.right, ir.top + text_y_offset, (std::to_string(i + 1) + '.').c_str(), i == 0 ? TC_WHITE : TC_YELLOW);
+			}
 			DrawCompanyIcon(c->index, icon_left, ir.top + icon_y_offset);
 
 			SetDParam(0, c->index);
@@ -141,7 +145,11 @@ public:
 		this->ordinal_width = 0;
 		for (uint i = 0; i < MAX_COMPANIES; i++) {
 			SetDParam(0, i + 1);
-			this->ordinal_width = std::max(this->ordinal_width, GetStringBoundingBox(STR_COMPANY_LEAGUE_COMPANY_RANK).width);
+			if (i + STR_COMPANY_LEAGUE_COMPANY_RANK <= 15) {
+				this->ordinal_width = std::max(this->ordinal_width, GetStringBoundingBox(STR_COMPANY_LEAGUE_COMPANY_RANK + i).width);
+			} else {
+				this->ordinal_width = std::max(this->ordinal_width, GetStringBoundingBox((std::to_string(i + 1) + '.').c_str()).width);
+			}
 		}
 		this->ordinal_width += WidgetDimensions::scaled.hsep_wide; // Keep some extra spacing
 
@@ -164,9 +172,7 @@ public:
 			SetDParam(2, widest_title);
 			widest_width = std::max(widest_width, GetStringBoundingBox(STR_COMPANY_LEAGUE_COMPANY_NAME).width);
 		}
-
 		this->text_width = widest_width + WidgetDimensions::scaled.hsep_indent * 3; // Keep some extra spacing
-
 		size.width = WidgetDimensions::scaled.framerect.Horizontal() + this->ordinal_width + this->icon.width + this->text_width + WidgetDimensions::scaled.hsep_wide;
 		size.height = this->line_height * OLD_MAX_COMPANIES + WidgetDimensions::scaled.framerect.Vertical();
 	}
@@ -177,6 +183,11 @@ public:
 			this->SetDirty();
 		}
 	}
+	void OnResize() override
+	{
+		this->vscroll->SetCapacityFromWidget(this, WID_PLT_BACKGROUND, WidgetDimensions::scaled.framerect.Vertical());
+	}
+
 
 	/**
 	 * Some data on this window has become invalid.
@@ -201,7 +212,12 @@ static constexpr NWidgetPart _nested_performance_league_widgets[] = {
 		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, WID_PLT_BACKGROUND), SetMinimalSize(400, 0), SetMinimalTextLines(15, WidgetDimensions::unscaled.framerect.Vertical()),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_GREY, WID_PLT_BACKGROUND), SetMinimalSize(400, 0), SetScrollbar(WID_PLT_SCROLLBAR), EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_VSCROLLBAR, COLOUR_GREY, WID_PLT_SCROLLBAR),
+			NWidget(WWT_RESIZEBOX, COLOUR_GREY),
+		EndContainer(),
 	EndContainer(),
 };
 
@@ -225,7 +241,7 @@ static void HandleLinkClick(Link link)
 
 		case LT_TILE:
 			if (!IsValidTile(TileIndex(link.target))) return;
-			xy = TileIndex{link.target};
+			xy = TileIndex{ link.target };
 			break;
 
 		case LT_INDUSTRY:
@@ -242,7 +258,8 @@ static void HandleLinkClick(Link link)
 			ShowCompany((CompanyID)link.target);
 			return;
 
-		case LT_STORY_PAGE: {
+		case LT_STORY_PAGE:
+		{
 			if (!StoryPage::IsValidID(link.target)) return;
 			CompanyID story_company = StoryPage::Get(link.target)->company;
 			ShowStoryBook(story_company, static_cast<StoryPageID>(link.target));
@@ -303,9 +320,8 @@ private:
 	}
 
 public:
-	ScriptLeagueWindow(WindowDesc &desc, LeagueTableID table) : Window(desc)
+	ScriptLeagueWindow(WindowDesc &desc, WindowNumber table) : Window(desc), table(table)
 	{
-		this->table = table;
 		this->BuildTable();
 		this->InitNested(table);
 	}

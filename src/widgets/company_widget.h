@@ -57,7 +57,6 @@ enum CompanyWidgets : WidgetID {
 	WID_C_SELECT_MULTIPLAYER,         ///< Multiplayer selection panel.
 	WID_C_COMPANY_PASSWORD,           ///< Button to set company password.
 	WID_C_COMPANY_JOIN,               ///< Button to join company.
-	WID_C_BUY_BACK_SHARE,
 };
 
 /** Widgets of the #CompanyFinancesWindow class. */

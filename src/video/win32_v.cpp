@@ -121,9 +121,9 @@ static uint MapWindowsKey(uint sym)
 		}
 	}
 
-	if (GetAsyncKeyState(VK_SHIFT)   < 0) key |= WKC_SHIFT;
+	if (GetAsyncKeyState(VK_SHIFT) < 0) key |= WKC_SHIFT;
 	if (GetAsyncKeyState(VK_CONTROL) < 0) key |= WKC_CTRL;
-	if (GetAsyncKeyState(VK_MENU)    < 0) key |= WKC_ALT;
+	if (GetAsyncKeyState(VK_MENU) < 0) key |= WKC_ALT;
 	return key;
 }
 
@@ -162,7 +162,7 @@ bool VideoDriver_Win32Base::MakeWindow(bool full_screen, bool resize)
 			DM_PELSWIDTH |
 			DM_PELSHEIGHT;
 		settings.dmBitsPerPel = this->GetFullscreenBpp();
-		settings.dmPelsWidth  = this->width_org;
+		settings.dmPelsWidth = this->width_org;
 		settings.dmPelsHeight = this->height_org;
 
 		/* Check for 8 bpp support. */
@@ -289,7 +289,7 @@ static void SetCompositionPos(HWND hwnd)
 			/* Get caret position. */
 			Point pt = _focused_window->GetCaretPosition();
 			cf.ptCurrentPos.x = _focused_window->left + pt.x;
-			cf.ptCurrentPos.y = _focused_window->top  + pt.y;
+			cf.ptCurrentPos.y = _focused_window->top + pt.y;
 		} else {
 			cf.ptCurrentPos.x = 0;
 			cf.ptCurrentPos.y = 0;
@@ -311,17 +311,17 @@ static void SetCandidatePos(HWND hwnd)
 		if (EditBoxInGlobalFocus()) {
 			Point pt = _focused_window->GetCaretPosition();
 			cf.ptCurrentPos.x = _focused_window->left + pt.x;
-			cf.ptCurrentPos.y = _focused_window->top  + pt.y;
+			cf.ptCurrentPos.y = _focused_window->top + pt.y;
 			if (_focused_window->window_class == WC_CONSOLE) {
-				cf.rcArea.left   = _focused_window->left;
-				cf.rcArea.top    = _focused_window->top;
-				cf.rcArea.right  = _focused_window->left + _focused_window->width;
-				cf.rcArea.bottom = _focused_window->top  + _focused_window->height;
+				cf.rcArea.left = _focused_window->left;
+				cf.rcArea.top = _focused_window->top;
+				cf.rcArea.right = _focused_window->left + _focused_window->width;
+				cf.rcArea.bottom = _focused_window->top + _focused_window->height;
 			} else {
-				cf.rcArea.left   = _focused_window->left + _focused_window->nested_focus->pos_x;
-				cf.rcArea.top    = _focused_window->top  + _focused_window->nested_focus->pos_y;
-				cf.rcArea.right  = cf.rcArea.left + _focused_window->nested_focus->current_x;
-				cf.rcArea.bottom = cf.rcArea.top  + _focused_window->nested_focus->current_y;
+				cf.rcArea.left = _focused_window->left + _focused_window->nested_focus->pos_x;
+				cf.rcArea.top = _focused_window->top + _focused_window->nested_focus->pos_y;
+				cf.rcArea.right = cf.rcArea.left + _focused_window->nested_focus->current_x;
+				cf.rcArea.bottom = cf.rcArea.top + _focused_window->nested_focus->current_y;
 			}
 		} else {
 			cf.ptCurrentPos.x = 0;
@@ -403,6 +403,40 @@ static void CancelIMEComposition(HWND hwnd)
 	HandleTextInput(nullptr, true);
 }
 
+#if defined(_MSC_VER) && defined(NTDDI_WIN10_RS4)
+/* We only use WinRT functions on Windows 10 or later. Unfortunately, newer Windows SDKs are now
+ * linking the two functions below directly instead of using dynamic linking as previously.
+ * To avoid any runtime linking errors on Windows 7 or older, we stub in our own dynamic
+ * linking trampoline. */
+
+static LibraryLoader _combase("combase.dll");
+
+extern "C" int32_t __stdcall WINRT_IMPL_RoOriginateLanguageException(int32_t error, void *message, void *languageException) noexcept
+{
+	typedef BOOL(WINAPI *PFNRoOriginateLanguageException)(int32_t, void *, void *);
+	static PFNRoOriginateLanguageException RoOriginateLanguageException = _combase.GetFunction("RoOriginateLanguageException");
+
+	if (RoOriginateLanguageException != nullptr) {
+		return RoOriginateLanguageException(error, message, languageException);
+	} else {
+		return TRUE;
+	}
+}
+
+extern "C" int32_t __stdcall WINRT_IMPL_RoGetActivationFactory(void *classId, winrt::guid const &iid, void **factory) noexcept
+{
+	typedef BOOL(WINAPI *PFNRoGetActivationFactory)(void *, winrt::guid const &, void **);
+	static PFNRoGetActivationFactory RoGetActivationFactory = _combase.GetFunction("RoGetActivationFactory");
+
+	if (RoGetActivationFactory != nullptr) {
+		return RoGetActivationFactory(classId, iid, factory);
+	} else {
+		*factory = nullptr;
+		return winrt::impl::error_class_not_available;
+	}
+}
+#endif
+
 static bool IsDarkModeEnabled()
 {
 	/* Only build if SDK is Windows 10 1803 or later. */
@@ -481,7 +515,8 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			SetDarkModeForWindow(hwnd, IsDarkModeEnabled());
 			break;
 
-		case WM_PAINT: {
+		case WM_PAINT:
+		{
 			RECT r;
 			GetUpdateRect(hwnd, &r, FALSE);
 			video_driver->MakeDirty(r.left, r.top, r.right - r.left, r.bottom - r.top);
@@ -539,7 +574,8 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (!_left_button_down && !_right_button_down) MyShowCursor(true);
 			return 0;
 
-		case WM_MOUSEMOVE: {
+		case WM_MOUSEMOVE:
+		{
 			int x = (int16_t)LOWORD(lParam);
 			int y = (int16_t)HIWORD(lParam);
 
@@ -609,7 +645,8 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			console = GB(lParam, 16, 8) == 41;
 			return 0;
 
-		case WM_CHAR: {
+		case WM_CHAR:
+		{
 			uint scancode = GB(lParam, 16, 8);
 			uint charcode = wParam;
 
@@ -628,8 +665,9 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return HandleCharMsg(cur_keycode, charcode);
 		}
 
-		case WM_KEYDOWN: {
-			/* No matter the keyboard layout, we will map the '~' to the console. */
+		case WM_KEYDOWN:
+		{
+/* No matter the keyboard layout, we will map the '~' to the console. */
 			uint scancode = GB(lParam, 16, 8);
 			keycode = scancode == 41 ? (uint)WKC_BACKQUOTE : MapWindowsKey(wParam);
 
@@ -693,8 +731,9 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			return 0;
 
-		case WM_SIZING: {
-			RECT *r = (RECT*)lParam;
+		case WM_SIZING:
+		{
+			RECT *r = (RECT *)lParam;
 			RECT r2;
 			int w, h;
 
@@ -751,7 +790,8 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 
-		case WM_DPICHANGED: {
+		case WM_DPICHANGED:
+		{
 			auto did_adjust = AdjustGUIZoom(AGZM_AUTOMATIC);
 
 			/* Resize the window to match the new DPI setting. */
@@ -780,7 +820,8 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 # define GET_WHEEL_DELTA_WPARAM(wparam) ((short)HIWORD(wparam))
 #endif  /* GET_WHEEL_DELTA_WPARAM */
 
-		case WM_MOUSEWHEEL: {
+		case WM_MOUSEWHEEL:
+		{
 			int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 
 			if (delta < 0) {
@@ -795,7 +836,8 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 
-		case WM_MOUSEHWHEEL: {
+		case WM_MOUSEHWHEEL:
+		{
 			int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 
 			_cursor.h_wheel += static_cast<float>(delta) * SCROLL_BUILTIN_MULTIPLIER * _settings_client.gui.scrollwheel_multiplier;
@@ -813,8 +855,9 @@ LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			video_driver->has_focus = false;
 			break;
 
-		case WM_ACTIVATE: {
-			/* Don't do anything if we are closing openttd */
+		case WM_ACTIVATE:
+		{
+/* Don't do anything if we are closing openttd */
 			if (_exit_game) break;
 
 			bool active = (LOWORD(wParam) != WA_INACTIVE);
@@ -904,7 +947,7 @@ void VideoDriver_Win32Base::Initialize()
 	FindResolutions(this->GetFullscreenBpp());
 
 	/* fullscreen uses those */
-	this->width  = this->width_org  = _cur_resolution.width;
+	this->width = this->width_org = _cur_resolution.width;
 	this->height = this->height_org = _cur_resolution.height;
 
 	Debug(driver, 2, "Resolution for display: {}x{}", _cur_resolution.width, _cur_resolution.height);
@@ -919,7 +962,7 @@ void VideoDriver_Win32Base::Stop()
 }
 void VideoDriver_Win32Base::MakeDirty(int left, int top, int width, int height)
 {
-	Rect r = {left, top, left + width, top + height};
+	Rect r = { left, top, left + width, top + height };
 	this->dirty_rect = BoundingRect(this->dirty_rect, r);
 }
 
@@ -1058,9 +1101,9 @@ Dimension VideoDriver_Win32Base::GetScreenSize() const
 
 float VideoDriver_Win32Base::GetDPIScale()
 {
-	typedef UINT (WINAPI *PFNGETDPIFORWINDOW)(HWND hwnd);
-	typedef UINT (WINAPI *PFNGETDPIFORSYSTEM)(VOID);
-	typedef HRESULT (WINAPI *PFNGETDPIFORMONITOR)(HMONITOR hMonitor, int dpiType, UINT *dpiX, UINT *dpiY);
+	typedef UINT(WINAPI *PFNGETDPIFORWINDOW)(HWND hwnd);
+	typedef UINT(WINAPI *PFNGETDPIFORSYSTEM)(VOID);
+	typedef HRESULT(WINAPI *PFNGETDPIFORMONITOR)(HMONITOR hMonitor, int dpiType, UINT *dpiX, UINT *dpiY);
 
 	static PFNGETDPIFORWINDOW _GetDpiForWindow = nullptr;
 	static PFNGETDPIFORSYSTEM _GetDpiForSystem = nullptr;
@@ -1213,9 +1256,9 @@ void VideoDriver_Win32GDI::MakePalette()
 	pal->palNumEntries = 256;
 
 	for (uint i = 0; i != 256; i++) {
-		pal->palPalEntry[i].peRed   = _local_palette.palette[i].r;
+		pal->palPalEntry[i].peRed = _local_palette.palette[i].r;
 		pal->palPalEntry[i].peGreen = _local_palette.palette[i].g;
-		pal->palPalEntry[i].peBlue  = _local_palette.palette[i].b;
+		pal->palPalEntry[i].peBlue = _local_palette.palette[i].b;
 		pal->palPalEntry[i].peFlags = 0;
 
 	}
@@ -1228,9 +1271,9 @@ void VideoDriver_Win32GDI::UpdatePalette(HDC dc, uint start, uint count)
 	RGBQUAD rgb[256];
 
 	for (uint i = 0; i != count; i++) {
-		rgb[i].rgbRed   = _local_palette.palette[start + i].r;
+		rgb[i].rgbRed = _local_palette.palette[start + i].r;
 		rgb[i].rgbGreen = _local_palette.palette[start + i].g;
-		rgb[i].rgbBlue  = _local_palette.palette[start + i].b;
+		rgb[i].rgbBlue = _local_palette.palette[start + i].b;
 		rgb[i].rgbReserved = 0;
 	}
 
@@ -1268,7 +1311,8 @@ void VideoDriver_Win32GDI::Paint()
 				this->UpdatePalette(dc2, _local_palette.first_dirty, _local_palette.count_dirty);
 				break;
 
-			case Blitter::PaletteAnimation::Blitter: {
+			case Blitter::PaletteAnimation::Blitter:
+			{
 				blitter->PaletteAnimate(_local_palette);
 				break;
 			}
@@ -1349,7 +1393,7 @@ static const char *SelectPixelFormat(HDC dc)
 		1,                             // Version of this struct.
 		PFD_DRAW_TO_WINDOW |           // Require window support.
 		PFD_SUPPORT_OPENGL |           // Require OpenGL support.
-		PFD_DOUBLEBUFFER   |           // Use double buffering.
+		PFD_DOUBLEBUFFER |           // Use double buffering.
 		PFD_DEPTH_DONTCARE,
 		PFD_TYPE_RGBA,                 // Request RGBA format.
 		24,                            // 24 bpp (excluding alpha).
