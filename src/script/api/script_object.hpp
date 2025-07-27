@@ -43,12 +43,19 @@ typedef bool (ScriptAsyncModeProc)();
  */
 class SimpleCountedObject {
 public:
-	SimpleCountedObject() : ref_count(0) {}
+	SimpleCountedObject() : ref_count(0)
+	{
+	}
 	virtual ~SimpleCountedObject() = default;
 
-	inline void AddRef() { ++this->ref_count; }
+	inline void AddRef()
+	{
+		++this->ref_count;
+	}
 	void Release();
-	virtual void FinalRelease() {};
+	virtual void FinalRelease()
+	{
+	};
 
 private:
 	int32_t ref_count;
@@ -62,9 +69,9 @@ private:
  * @api none
  */
 class ScriptObject : public SimpleCountedObject {
-friend class ScriptInstance;
-friend class ScriptController;
-friend class TestScriptController;
+	friend class ScriptInstance;
+	friend class ScriptController;
+	friend class TestScriptController;
 protected:
 	/**
 	 * A class that handles the current active instance. By instantiating it at
@@ -73,7 +80,7 @@ protected:
 	 *  reverts to the active instance it was before instantiating.
 	 */
 	class ActiveInstance {
-	friend class ScriptObject;
+		friend class ScriptObject;
 	public:
 		ActiveInstance(ScriptInstance *instance);
 		~ActiveInstance();
@@ -91,14 +98,20 @@ protected:
 	 *  - the data for the object (any supported types)
 	 * @return True iff saving this type is supported.
 	 */
-	virtual bool SaveObject(HSQUIRRELVM) { return false; }
+	virtual bool SaveObject(HSQUIRRELVM)
+	{
+		return false;
+	}
 
-	/**
-	 * Load this object.
-	 * The data for the object must be pushed on the stack before the call.
-	 * @return True iff loading this type is supported.
-	 */
-	virtual bool LoadObject(HSQUIRRELVM) { return false; }
+/**
+ * Load this object.
+ * The data for the object must be pushed on the stack before the call.
+ * @return True iff loading this type is supported.
+ */
+	virtual bool LoadObject(HSQUIRRELVM)
+	{
+		return false;
+	}
 
 public:
 	/**
@@ -162,30 +175,30 @@ protected:
 
 		static bool Do(Script_SuspendCallbackProc *callback, Targs... args)
 		{
-			return ScriptObject::DoCommand<Tcmd>(TileIndex{0}, PayloadType::Make(std::forward<Targs>(args)...), callback);
+			return ScriptObject::DoCommand<Tcmd>(TileIndex{ 0 }, PayloadType::Make(std::forward<Targs>(args)...), callback);
 		}
 
 		static bool Do(Targs... args)
 		{
-			return ScriptObject::DoCommand<Tcmd>(TileIndex{0}, PayloadType::Make(std::forward<Targs>(args)...), nullptr);
+			return ScriptObject::DoCommand<Tcmd>(TileIndex{ 0 }, PayloadType::Make(std::forward<Targs>(args)...), nullptr);
 		}
 	};
 
 	/* Note that output_no_tile is used here instead of input_no_tile, because a tile index used only for error messages is not useful */
 	template <Commands Tcmd>
 	struct Command : public std::conditional_t<::CommandTraits<Tcmd>::output_no_tile,
-			ScriptDoCommandHelperNoTile<Tcmd, typename ::CmdPayload<Tcmd>::Tuple>,
-			ScriptDoCommandHelper<Tcmd, typename ::CmdPayload<Tcmd>::Tuple>> {};
+		ScriptDoCommandHelperNoTile<Tcmd, typename ::CmdPayload<Tcmd>::Tuple>,
+		ScriptDoCommandHelper<Tcmd, typename ::CmdPayload<Tcmd>::Tuple>> {};
 
-	/**
-	 * Store the latest command executed by the script.
-	 */
-	static void SetLastCommand(Commands cmd, CallbackParameter cb_param);
+/**
+ * Store the latest command executed by the script.
+ */
+	static void SetLastCommand(Commands cmd, TileIndex tile, CallbackParameter cb_param);
 
 	/**
 	 * Check if it's the latest command executed by the script.
 	 */
-	static bool CheckLastCommand(Commands cmd, CallbackParameter cb_param);
+	static bool CheckLastCommand(Commands cmd, TileIndex tile, CallbackParameter cb_param);
 
 	/**
 	 * Sets the DoCommand costs counter to a value.
@@ -410,10 +423,10 @@ public:
 	}
 
 	/* No copy assignment. */
-	ScriptObjectRef& operator=(const ScriptObjectRef<T> &other) = delete;
+	ScriptObjectRef &operator=(const ScriptObjectRef<T> &other) = delete;
 
 	/* Move assignment. */
-	ScriptObjectRef& operator=(ScriptObjectRef<T> &&other) noexcept
+	ScriptObjectRef &operator=(ScriptObjectRef<T> &&other) noexcept
 	{
 		std::swap(this->data, other.data);
 		return *this;

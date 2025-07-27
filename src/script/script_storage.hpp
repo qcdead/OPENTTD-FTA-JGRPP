@@ -35,7 +35,7 @@ typedef bool (ScriptAsyncModeProc)();
  * The storage for each script. It keeps track of important information.
  */
 class ScriptStorage {
-friend class ScriptObject;
+	friend class ScriptObject;
 private:
 	ScriptModeProc *mode;                    ///< The current build mode we are int.
 	class ScriptObject *mode_instance;       ///< The instance belonging to the current build mode.
@@ -55,6 +55,7 @@ private:
 	bool last_command_res;           ///< The last result of the command.
 
 	Commands last_cmd;               ///< The last cmd passed to a command.
+	TileIndex last_tile;             ///< The last tile passed to a command.
 	CallbackParameter last_cb_param; ///< The last callback parameter passed to a command.
 
 	std::vector<int> callback_value; ///< The values which need to survive a callback.
@@ -69,26 +70,28 @@ private:
 
 public:
 	ScriptStorage() :
-		mode              (nullptr),
-		mode_instance     (nullptr),
-		async_mode        (nullptr),
-		async_mode_instance (nullptr),
-		root_company      (INVALID_OWNER),
-		company           (INVALID_OWNER),
-		delay             (1),
-		allow_do_command  (true),
+		mode(nullptr),
+		mode_instance(nullptr),
+		async_mode(nullptr),
+		async_mode_instance(nullptr),
+		root_company(INVALID_OWNER),
+		company(INVALID_OWNER),
+		delay(1),
+		allow_do_command(true),
 		/* costs (can't be set) */
-		last_cost         (0),
-		last_result       (0),
-		last_result_valid (false),
-		last_command_res  (true),
-		last_cmd          (CMD_END),
-		last_cb_param     (0),
+		last_cost(0),
+		last_result(0),
+		last_result_valid(false),
+		last_command_res(true),
+		last_cmd(CMD_END),
+		last_tile(INVALID_TILE),
+		last_cb_param(0),
 		/* calback_value (can't be set) */
-		road_type         (INVALID_ROADTYPE),
-		rail_type         (INVALID_RAILTYPE),
-		event_data        (nullptr)
-	{ }
+		road_type(INVALID_ROADTYPE),
+		rail_type(INVALID_RAILTYPE),
+		event_data(nullptr)
+	{
+	}
 
 	~ScriptStorage();
 };

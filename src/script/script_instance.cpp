@@ -72,7 +72,7 @@ ScriptInstance::ScriptInstance(const char *APIName, ScriptType script_type) :
 	allow_text_param_mismatch(false)
 {
 	this->storage = new ScriptStorage();
-	this->engine  = new Squirrel(APIName);
+	this->engine = new Squirrel(APIName);
 	this->engine->SetPrintFunction(&PrintFunc);
 }
 
@@ -135,7 +135,7 @@ bool ScriptInstance::LoadCompatibilityScripts(const std::string &api_version, Su
 {
 	const char *api_vers[] = { "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.11", "12", "13", "14", "15" };
 	uint api_idx = 0;
-	for (; api_idx < lengthof(api_vers) ; api_idx++) {
+	for (; api_idx < lengthof(api_vers); api_idx++) {
 		if (api_version == api_vers[api_idx]) break;
 	}
 	if (api_idx < 12) {
@@ -221,8 +221,8 @@ void ScriptInstance::GameLoop()
 	if (this->is_paused) return;
 	this->controller->ticks++;
 
-	if (this->suspend   < -1) this->suspend++; // Multiplayer suspend, increase up to -1.
-	if (this->suspend   < 0)  return;          // Multiplayer suspend, wait for Continue().
+	if (this->suspend < -1) this->suspend++; // Multiplayer suspend, increase up to -1.
+	if (this->suspend < 0)  return;          // Multiplayer suspend, wait for Continue().
 	if (--this->suspend > 0)  return;          // Singleplayer suspend, decrease to 0.
 
 	_current_company = ScriptObject::GetCompany();
@@ -236,14 +236,14 @@ void ScriptInstance::GameLoop()
 		try {
 			this->callback(this);
 		} catch (Script_Suspend &e) {
-			this->suspend  = e.GetSuspendTime();
+			this->suspend = e.GetSuspendTime();
 			this->callback = e.GetSuspendCallback();
 
 			return;
 		}
 	}
 
-	this->suspend  = 0;
+	this->suspend = 0;
 	this->callback = nullptr;
 
 	if (!this->is_started) {
@@ -266,7 +266,7 @@ void ScriptInstance::GameLoop()
 			/* Start the script by calling Start() */
 			if (!this->engine->CallMethod(*this->instance, "Start", this->GetMaxOpsTillSuspend()) || !this->engine->IsSuspended()) this->Died();
 		} catch (Script_Suspend &e) {
-			this->suspend  = e.GetSuspendTime();
+			this->suspend = e.GetSuspendTime();
 			this->callback = e.GetSuspendCallback();
 		} catch (Script_FatalError &e) {
 			this->is_dead = true;
@@ -287,7 +287,7 @@ void ScriptInstance::GameLoop()
 	try {
 		if (!this->engine->Resume(this->GetMaxOpsTillSuspend())) this->Died();
 	} catch (Script_Suspend &e) {
-		this->suspend  = e.GetSuspendTime();
+		this->suspend = e.GetSuspendTime();
 		this->callback = e.GetSuspendCallback();
 	} catch (Script_FatalError &e) {
 		this->is_dead = true;
@@ -392,7 +392,8 @@ ScriptLogTypes::LogData &ScriptInstance::GetLogData()
 	}
 
 	switch (sq_gettype(vm, index)) {
-		case OT_INTEGER: {
+		case OT_INTEGER:
+		{
 			SlWriteByte(SQSL_INT);
 			SQInteger res;
 			sq_getinteger(vm, index, &res);
@@ -400,7 +401,8 @@ ScriptLogTypes::LogData &ScriptInstance::GetLogData()
 			return true;
 		}
 
-		case OT_STRING: {
+		case OT_STRING:
+		{
 			SlWriteByte(SQSL_STRING);
 			const SQChar *buf;
 			sq_getstring(vm, index, &buf);
@@ -414,7 +416,8 @@ ScriptLogTypes::LogData &ScriptInstance::GetLogData()
 			return true;
 		}
 
-		case OT_ARRAY: {
+		case OT_ARRAY:
+		{
 			SlWriteByte(SQSL_ARRAY);
 			sq_pushnull(vm);
 			while (SQ_SUCCEEDED(sq_next(vm, index - 1))) {
@@ -431,7 +434,8 @@ ScriptLogTypes::LogData &ScriptInstance::GetLogData()
 			return true;
 		}
 
-		case OT_TABLE: {
+		case OT_TABLE:
+		{
 			SlWriteByte(SQSL_TABLE);
 			sq_pushnull(vm);
 			while (SQ_SUCCEEDED(sq_next(vm, index - 1))) {
@@ -448,7 +452,8 @@ ScriptLogTypes::LogData &ScriptInstance::GetLogData()
 			return true;
 		}
 
-		case OT_BOOL: {
+		case OT_BOOL:
+		{
 			SlWriteByte(SQSL_BOOL);
 			SQBool res;
 			sq_getbool(vm, index, &res);
@@ -456,12 +461,14 @@ ScriptLogTypes::LogData &ScriptInstance::GetLogData()
 			return true;
 		}
 
-		case OT_NULL: {
+		case OT_NULL:
+		{
 			SlWriteByte(SQSL_NULL);
 			return true;
 		}
 
-		case OT_INSTANCE:{
+		case OT_INSTANCE:
+		{
 			SQInteger top = sq_gettop(vm);
 			try {
 				ScriptObject *obj = static_cast<ScriptObject *>(Squirrel::GetRealInstance(vm, -1, "Object"));
@@ -581,7 +588,8 @@ bool ScriptInstance::IsPaused()
 {
 	uint8_t type = SlReadByte();
 	switch (type) {
-		case SQSL_INT: {
+		case SQSL_INT:
+		{
 			int64_t value;
 			if (IsSavegameVersionBefore(SLV_SCRIPT_INT64) && SlXvIsFeatureMissing(XSLFI_SCRIPT_INT64)) {
 				value = (int32_t)SlReadUint32();
@@ -592,7 +600,8 @@ bool ScriptInstance::IsPaused()
 			return true;
 		}
 
-		case SQSL_STRING: {
+		case SQSL_STRING:
+		{
 			uint8_t len = SlReadByte();
 			char buf[std::numeric_limits<decltype(len)>::max()];
 			SlCopyBytesRead(buf, len);
@@ -601,29 +610,34 @@ bool ScriptInstance::IsPaused()
 		}
 
 		case SQSL_ARRAY:
-		case SQSL_TABLE: {
+		case SQSL_TABLE:
+		{
 			if (data != nullptr) data->push_back(static_cast<SQSaveLoadType>(type));
 			while (LoadObjects(data));
 			return true;
 		}
 
-		case SQSL_BOOL: {
+		case SQSL_BOOL:
+		{
 			uint8_t sl_byte = SlReadByte();
 			if (data != nullptr) data->push_back(static_cast<SQBool>(sl_byte != 0));
 			return true;
 		}
 
-		case SQSL_NULL: {
+		case SQSL_NULL:
+		{
 			if (data != nullptr) data->push_back(static_cast<SQSaveLoadType>(type));
 			return true;
 		}
 
-		case SQSL_INSTANCE: {
+		case SQSL_INSTANCE:
+		{
 			if (data != nullptr) data->push_back(static_cast<SQSaveLoadType>(type));
 			return true;
 		}
 
-		case SQSL_ARRAY_TABLE_END: {
+		case SQSL_ARRAY_TABLE_END:
+		{
 			if (data != nullptr) data->push_back(static_cast<SQSaveLoadType>(type));
 			return false;
 		}
@@ -641,9 +655,18 @@ bool ScriptInstance::IsPaused()
 		HSQUIRRELVM vm;
 		ScriptData *data;
 
-		bool operator()(const SQInteger &value) { sq_pushinteger(this->vm, value); return true; }
-		bool operator()(const std::string &value) { sq_pushstring(this->vm, value, -1); return true; }
-		bool operator()(const SQBool &value) { sq_pushbool(this->vm, value); return true; }
+		bool operator()(const SQInteger &value)
+		{
+			sq_pushinteger(this->vm, value); return true;
+		}
+		bool operator()(const std::string &value)
+		{
+			sq_pushstring(this->vm, value, -1); return true;
+		}
+		bool operator()(const SQBool &value)
+		{
+			sq_pushbool(this->vm, value); return true;
+		}
 		bool operator()(const SQSaveLoadType &type)
 		{
 			switch (type) {
@@ -668,7 +691,8 @@ bool ScriptInstance::IsPaused()
 					sq_pushnull(this->vm);
 					return true;
 
-				case SQSL_INSTANCE: {
+				case SQSL_INSTANCE:
+				{
 					SQInteger top = sq_gettop(this->vm);
 					LoadObjects(this->vm, this->data);
 					const SQChar *buf;
@@ -701,7 +725,7 @@ bool ScriptInstance::IsPaused()
 		}
 	};
 
-	return std::visit(visitor{vm, data}, value);
+	return std::visit(visitor{ vm, data }, value);
 }
 
 /* static */ void ScriptInstance::LoadEmpty()
@@ -813,11 +837,11 @@ uint32_t ScriptInstance::GetMaxOpsTillSuspend() const
 	return _settings_game.script.script_max_opcode_till_suspend;
 }
 
-bool ScriptInstance::DoCommandCallback(const CommandCost &result, Commands cmd, const CommandPayloadBase &payload, CallbackParameter param)
+bool ScriptInstance::DoCommandCallback(const CommandCost &result, Commands cmd, TileIndex tile, const CommandPayloadBase &payload, CallbackParameter param)
 {
 	ScriptObject::ActiveInstance active(this);
 
-	if (!ScriptObject::CheckLastCommand(cmd, param)) {
+	if (!ScriptObject::CheckLastCommand(cmd, tile, param)) {
 		Debug(script, 1, "DoCommandCallback terminating a script, last command does not match expected command");
 		return false;
 	}
@@ -832,7 +856,7 @@ bool ScriptInstance::DoCommandCallback(const CommandCost &result, Commands cmd, 
 		ScriptObject::SetLastCommandResultData(result.GetResultData());
 	}
 
-	ScriptObject::SetLastCommand(CMD_END, 0);
+	ScriptObject::SetLastCommand(CMD_END, INVALID_TILE, 0);
 
 	return true;
 }

@@ -28,13 +28,13 @@ class ScriptInstance {
 private:
 	/** The type of the data that follows in the savegame. */
 	enum SQSaveLoadType : uint8_t {
-		SQSL_INT             = 0x00, ///< The following data is an integer.
-		SQSL_STRING          = 0x01, ///< The following data is an string.
-		SQSL_ARRAY           = 0x02, ///< The following data is an array.
-		SQSL_TABLE           = 0x03, ///< The following data is an table.
-		SQSL_BOOL            = 0x04, ///< The following data is a boolean.
-		SQSL_NULL            = 0x05, ///< A null variable.
-		SQSL_INSTANCE        = 0x06, ///< The following data is an instance.
+		SQSL_INT = 0x00, ///< The following data is an integer.
+		SQSL_STRING = 0x01, ///< The following data is an string.
+		SQSL_ARRAY = 0x02, ///< The following data is an array.
+		SQSL_TABLE = 0x03, ///< The following data is an table.
+		SQSL_BOOL = 0x04, ///< The following data is a boolean.
+		SQSL_NULL = 0x05, ///< A null variable.
+		SQSL_INSTANCE = 0x06, ///< The following data is an instance.
 		SQSL_ARRAY_TABLE_END = 0xFF, ///< Marks the end of an array or table, no data follows.
 	};
 
@@ -148,21 +148,30 @@ public:
 	/**
 	 * Get the controller attached to the instance.
 	 */
-	class ScriptController *GetController() { return controller; }
+	class ScriptController *GetController()
+	{
+		return controller;
+	}
 
-	/**
-	 * Return the "this script died" value
-	 */
-	inline bool IsDead() const { return this->is_dead; }
+/**
+ * Return the "this script died" value
+ */
+	inline bool IsDead() const
+	{
+		return this->is_dead;
+	}
 
-	/**
-	 * Return whether the script is alive.
-	 */
-	inline bool IsAlive() const { return !this->IsDead() && !this->in_shutdown; }
+/**
+ * Return whether the script is alive.
+ */
+	inline bool IsAlive() const
+	{
+		return !this->IsDead() && !this->in_shutdown;
+	}
 
-	/**
-	 * Call the script Save function and save all data in the savegame.
-	 */
+/**
+ * Call the script Save function and save all data in the savegame.
+ */
 	void Save();
 
 	/**
@@ -229,7 +238,7 @@ public:
 	 * @param param param Callback parameter given to DoCommandPInternal.
 	 * @return true if we handled result.
 	 */
-	bool DoCommandCallback(const CommandCost &result, Commands cmd, const CommandPayloadBase &payload, CallbackParameter param);
+	bool DoCommandCallback(const CommandCost &result, Commands cmd, TileIndex tile, const CommandPayloadBase &payload, CallbackParameter param);
 
 	/**
 	 * Insert an event for this script.
@@ -242,7 +251,10 @@ public:
 	 *  script executed a DoCommand, executed this.Sleep() or it has been
 	 *  paused.
 	 */
-	bool IsSleeping() { return this->suspend != 0; }
+	bool IsSleeping()
+	{
+		return this->suspend != 0;
+	}
 
 	size_t GetAllocatedMemory() const;
 
@@ -251,12 +263,15 @@ public:
 	/**
 	 * Indicate whether this instance is currently being destroyed.
 	 */
-	inline bool InShutdown() const { return this->in_shutdown; }
+	inline bool InShutdown() const
+	{
+		return this->in_shutdown;
+	}
 
-	/**
-	 * Decrease the ref count of a squirrel object.
-	 * @param obj The object to release.
-	 **/
+/**
+ * Decrease the ref count of a squirrel object.
+ * @param obj The object to release.
+ **/
 	void ReleaseSQObject(HSQOBJECT *obj);
 
 protected:
@@ -333,9 +348,15 @@ private:
 	static bool LoadObjects(HSQUIRRELVM vm, ScriptData *data);
 
 public:
-	inline ScriptType GetScriptType() const { return this->script_type; }
+	inline ScriptType GetScriptType() const
+	{
+		return this->script_type;
+	}
 
-	inline bool IsTextParamMismatchAllowed() const { return this->allow_text_param_mismatch; }
+	inline bool IsTextParamMismatchAllowed() const
+	{
+		return this->allow_text_param_mismatch;
+	}
 };
 
 #endif /* SCRIPT_INSTANCE_HPP */

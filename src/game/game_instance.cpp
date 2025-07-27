@@ -28,7 +28,8 @@
 
 GameInstance::GameInstance() :
 	ScriptInstance("GS", ScriptType::GS)
-{}
+{
+}
 
 void GameInstance::Initialize(GameInfo *info)
 {
@@ -86,9 +87,8 @@ void GameInstance::Died()
  * DoCommand callback function for all commands executed by Game Scripts.
  */
 void CcGame(const CommandCost &result, Commands cmd, TileIndex tile, const CommandPayloadBase &payload, CallbackParameter param)
-
 {
-	if (Game::GetGameInstance()->DoCommandCallback(result, cmd, payload, param)) {
+	if (Game::GetGameInstance()->DoCommandCallback(result, cmd, tile, payload, param)) {
 		Game::GetGameInstance()->Continue();
 	}
 }

@@ -116,19 +116,21 @@ ScriptObject::ActiveInstance::~ActiveInstance()
 	return GetStorage()->async_mode_instance;
 }
 
-/* static */ void ScriptObject::SetLastCommand(Commands cmd, CallbackParameter cb_param)
+/* static */ void ScriptObject::SetLastCommand(Commands cmd, TileIndex tile, CallbackParameter cb_param)
 {
 	ScriptStorage *s = GetStorage();
-	Debug(script, 6, "SetLastCommand company={} cmd={:X}, cb_param={:X}", s->root_company, cmd, cb_param);
+	Debug(script, 6, "SetLastCommand company={} cmd={:X} tile={:X}, cb_param={:X}", s->root_company, cmd, tile, cb_param);
 	s->last_cmd = cmd;
+	s->last_tile = tile;
 	s->last_cb_param = cb_param;
 }
 
-/* static */ bool ScriptObject::CheckLastCommand(Commands cmd, CallbackParameter cb_param)
+/* static */ bool ScriptObject::CheckLastCommand(Commands cmd, TileIndex tile, CallbackParameter cb_param)
 {
 	ScriptStorage *s = GetStorage();
-	Debug(script, 6, "CheckLastCommand company={} cmd={:X}, cb_param={:X}", s->root_company, cmd, cb_param);
+	Debug(script, 6, "CheckLastCommand company={} cmd={:X} tile={:X}, cb_param={:X}", s->root_company, cmd, tile, cb_param);
 	if (s->last_cmd != cmd) return false;
+	if (s->last_tile != tile) return false;
 	if (s->last_cb_param != cb_param) return false;
 
 	return true;
@@ -316,7 +318,7 @@ ScriptObject::ActiveInstance::~ActiveInstance()
 	CallbackParameter cb_param = ++_last_cb_param;
 
 	/* Store the command for command callback validation. */
-	if (!estimate_only && _networking && !_generating_world) SetLastCommand(cmd, cb_param);
+	if (!estimate_only && _networking && !_generating_world) SetLastCommand(cmd, tile, cb_param);
 
 	/* Try to perform the command. */
 	const bool use_cb = (_networking && !_generating_world && !asynchronous);

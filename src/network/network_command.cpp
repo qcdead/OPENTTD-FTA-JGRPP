@@ -42,6 +42,7 @@ void NetworkSendCommandImplementation(Commands cmd, TileIndex tile, const Comman
 
 	c.command_container.cmd = cmd;
 	c.command_container.error_msg = error_msg;
+	c.command_container.tile = tile;
 
 	c.callback = callback;
 	c.callback_param = callback_param;
@@ -215,7 +216,7 @@ void NetworkDistributeCommands()
  */
 const char *NetworkGameSocketHandler::ReceiveCommand(Packet &p, CommandPacket &cp)
 {
-	cp.company = (CompanyID)p.Recv_uint16();
+	cp.company = (CompanyID)p.Recv_uint8();
 	DeserialisationBuffer buf = p.BorrowAsDeserialisationBuffer();
 	const char *err = cp.command_container.Deserialise(buf);
 	p.ReturnDeserialisationBuffer(std::move(buf));
@@ -241,7 +242,7 @@ const char *NetworkGameSocketHandler::ReceiveCommand(Packet &p, CommandPacket &c
  */
 void NetworkGameSocketHandler::SendCommand(Packet &p, const OutgoingCommandPacket &cp)
 {
-	p.Send_uint16(cp.company);
+	p.Send_uint8(cp.company);
 
 	cp.command_container.Serialise(p.AsBufferSerialisationRef());
 

@@ -34,7 +34,8 @@
 
 AIInstance::AIInstance() :
 	ScriptInstance("AI", ScriptType::AI)
-{}
+{
+}
 
 void AIInstance::Initialize(AIInfo *info)
 {
@@ -109,7 +110,7 @@ void CcAI(const CommandCost &result, Commands cmd, TileIndex tile, const Command
 	const Company *c = Company::GetIfValid(_current_company);
 	if (c == nullptr || c->ai_instance == nullptr) return;
 
-	if (c->ai_instance->DoCommandCallback(result, cmd, payload, param)) {
+	if (c->ai_instance->DoCommandCallback(result, cmd, tile, payload, param)) {
 		c->ai_instance->Continue();
 	}
 }
