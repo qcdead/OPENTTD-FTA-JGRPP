@@ -104,7 +104,7 @@ ring_buffer<uint> _network_sync_record_counts;
 bool _record_sync_records = false;
 
 /** The amount of clients connected */
-uint8_t _network_clients_connected = 0;
+uint32_t _network_clients_connected = 0;
 
 extern std::string GenerateUid(std::string_view subject);
 

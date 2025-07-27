@@ -337,7 +337,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 
 	/* We just lost one client :( */
 	if (this->status >= STATUS_AUTHORIZED) _network_game_info.clients_on--;
-	extern uint8_t _network_clients_connected;
+	extern uint32_t _network_clients_connected;
 	_network_clients_connected--;
 
 	this->SendPackets(true);
@@ -353,7 +353,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
  */
 /* static */ bool ServerNetworkGameSocketHandler::AllowConnection()
 {
-	extern uint8_t _network_clients_connected;
+	extern uint32_t _network_clients_connected;
 	bool accept = _network_clients_connected < MAX_CLIENTS;
 
 	/* We can't go over the MAX_CLIENTS limit here. However, the
@@ -398,7 +398,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendClientInfo(NetworkClientIn
 	if (ci->client_id != INVALID_CLIENT_ID) {
 		auto p = std::make_unique<Packet>(this, PACKET_SERVER_CLIENT_INFO, TCP_MTU);
 		p->Send_uint32(ci->client_id);
-		p->Send_uint16 (ci->client_playas);
+		p->Send_uint32 (ci->client_playas);
 		p->Send_string(ci->client_name);
 		//p->Send_string(ci->public_key);
 
@@ -903,7 +903,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMove(ClientID client_id, C
 	auto p = std::make_unique<Packet>(this, PACKET_SERVER_MOVE, TCP_MTU);
 
 	p->Send_uint32(client_id);
-	p->Send_uint16(company_id);
+	p->Send_uint32(company_id);
 	this->SendPacket(std::move(p));
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -997,7 +997,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_IDENTIFY(Packet
 	if (this->status != STATUS_IDENTIFY) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
 	std::string client_name = p.Recv_string(NETWORK_CLIENT_NAME_LENGTH);
-	CompanyID playas = (Owner)p.Recv_uint16();
+	CompanyID playas = (Owner)p.Recv_uint32();
 
 	if (this->HasClientQuit()) return NETWORK_RECV_STATUS_CLIENT_QUIT;
 
@@ -1762,7 +1762,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_MOVE(Packet &p)
 {
 	if (this->status != STATUS_ACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	CompanyID company_id = (Owner)p.Recv_uint16();
+	CompanyID company_id = (Owner)p.Recv_uint32();
 
 	/* Check if the company is valid, we don't allow moving to AI companies */
 	if (company_id != COMPANY_SPECTATOR && !Company::IsValidHumanID(company_id)) return NETWORK_RECV_STATUS_OKAY;

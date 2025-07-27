@@ -398,7 +398,7 @@ static std::string _password_server_id;
 static std::string _company_password_server_id;
 
 /** Maximum number of companies of the currently joined server. */
-static uint16_t _network_server_max_companies;
+static uint32_t _network_server_max_companies;
 /** The current name of the server you are on. */
 std::string _network_server_name;
 
@@ -487,7 +487,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendIdentify()
 {
 	auto p = std::make_unique<Packet>(my_client, PACKET_CLIENT_IDENTIFY, TCP_MTU);
 	p->Send_string(_settings_client.network.client_name); // Client name
-	p->Send_uint16 (_network_join.company);     // PlayAs
+	p->Send_uint32 (_network_join.company);     // PlayAs
 	p->Send_uint8 (0); // Used to be language
 	my_client->SendPacket(std::move(p));
 	return NETWORK_RECV_STATUS_OKAY;
@@ -734,7 +734,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendRCon(const std::string &pa
 NetworkRecvStatus ClientNetworkGameSocketHandler::SendMove(CompanyID company, const std::string &password)
 {
 	auto p = std::make_unique<Packet>(my_client, PACKET_CLIENT_MOVE, TCP_MTU);
-	p->Send_uint16(company);
+	p->Send_uint32(company);
 	p->Send_string(GenerateCompanyPasswordHash(password, _company_password_server_id, _company_password_game_seed));
 	my_client->SendPacket(std::move(p));
 	return NETWORK_RECV_STATUS_OKAY;
@@ -780,7 +780,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::Receive_SERVER_CLIENT_INFO(Pac
 {
 	NetworkClientInfo *ci;
 	ClientID client_id = (ClientID)p.Recv_uint32();
-	CompanyID playas = (CompanyID)p.Recv_uint16();
+	CompanyID playas = (CompanyID)p.Recv_uint32();
 
 	std::string name = p.Recv_string(NETWORK_NAME_LENGTH);
 	//std::string public_key = p.Recv_string(NETWORK_PUBLIC_KEY_LENGTH);
@@ -1393,7 +1393,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::Receive_SERVER_MOVE(Packet &p)
 
 	/* Nothing more in this packet... */
 	ClientID client_id   = (ClientID)p.Recv_uint32();
-	CompanyID company_id = (CompanyID)p.Recv_uint16();
+	CompanyID company_id = (CompanyID)p.Recv_uint32();
 
 	if (client_id == 0) {
 		/* definitely an invalid client id, debug message and do nothing. */
@@ -1419,7 +1419,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::Receive_SERVER_CONFIG_UPDATE(P
 {
 	if (this->status < STATUS_ACTIVE) return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 
-	_network_server_max_companies = p.Recv_uint16();
+	_network_server_max_companies = p.Recv_uint32();
 	_network_server_name = p.Recv_string(NETWORK_NAME_LENGTH);
 
 	InvalidateWindowData(WC_CLIENT_LIST, 0);
