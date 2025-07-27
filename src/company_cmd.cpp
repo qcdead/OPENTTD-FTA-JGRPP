@@ -858,7 +858,7 @@ void OnTick_Companies(bool main_tick)
 			}
 
 			for (auto i = 0; i < _settings_game.difficulty.max_no_competitors; i++) {
-				if (_networking && Company::GetNumItems() >= static_cast<int>(_settings_client.network.max_companies)) break;
+				if (_networking && Company::GetNumItems() >= _settings_client.network.max_companies) break;
 				if (n++ >= _settings_game.difficulty.max_no_competitors) break;
 				Command<CMD_COMPANY_CTRL>::Post(CCA_NEW_AI, INVALID_COMPANY, CRR_NONE, INVALID_CLIENT_ID, {});
 			}

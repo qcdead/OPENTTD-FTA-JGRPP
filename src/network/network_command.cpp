@@ -216,7 +216,7 @@ void NetworkDistributeCommands()
  */
 const char *NetworkGameSocketHandler::ReceiveCommand(Packet &p, CommandPacket &cp)
 {
-	cp.company = (CompanyID)p.Recv_uint8();
+	cp.company = (CompanyID)p.Recv_uint16();
 	DeserialisationBuffer buf = p.BorrowAsDeserialisationBuffer();
 	const char *err = cp.command_container.Deserialise(buf);
 	p.ReturnDeserialisationBuffer(std::move(buf));
@@ -242,7 +242,7 @@ const char *NetworkGameSocketHandler::ReceiveCommand(Packet &p, CommandPacket &c
  */
 void NetworkGameSocketHandler::SendCommand(Packet &p, const OutgoingCommandPacket &cp)
 {
-	p.Send_uint8(cp.company);
+	p.Send_uint16(cp.company);
 
 	cp.command_container.Serialise(p.AsBufferSerialisationRef());
 
