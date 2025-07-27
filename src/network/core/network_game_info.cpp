@@ -163,7 +163,7 @@ const NetworkServerGameInfo &GetCurrentNetworkServerGameInfo()
 	 *  - invite_code
 	 * These don't need to be updated manually here.
 	 */
-	_network_game_info.companies_on  = (uint32_t)Company::GetNumItems();
+	_network_game_info.companies_on  = (uint16_t)Company::GetNumItems();
 	_network_game_info.spectators_on = NetworkSpectatorCount();
 	_network_game_info.calendar_date = CalTime::CurDate();
 	_network_game_info.ticks_playing = _scaled_tick_counter;
@@ -245,17 +245,17 @@ void SerializeNetworkGameInfo(Packet &p, const NetworkServerGameInfo &info, bool
 	p.Send_uint32(info.calendar_start.base());
 
 	/* NETWORK_GAME_INFO_VERSION = 2 */
-	p.Send_uint32 (info.companies_max);
-	p.Send_uint32 (info.companies_on);
-	p.Send_uint32 (info.clients_max); // Used to be max-spectators
+	p.Send_uint16 (info.companies_max);
+	p.Send_uint16 (info.companies_on);
+	p.Send_uint16 (info.clients_max); // Used to be max-spectators
 
 	/* NETWORK_GAME_INFO_VERSION = 1 */
 	p.Send_string(info.server_name);
 	p.Send_string(info.server_revision);
 	p.Send_bool  (info.use_password);
-	p.Send_uint32 (info.clients_max);
-	p.Send_uint32 (info.clients_on);
-	p.Send_uint32 (info.spectators_on);
+	p.Send_uint16 (info.clients_max);
+	p.Send_uint16 (info.clients_on);
+	p.Send_uint16 (info.spectators_on);
 
 	auto encode_map_size = [&](uint32_t in) -> uint16_t {
 		if (in < UINT16_MAX) {
@@ -264,8 +264,8 @@ void SerializeNetworkGameInfo(Packet &p, const NetworkServerGameInfo &info, bool
 			return 65000 + FindFirstBit(in);
 		}
 	};
-	p.Send_uint32(encode_map_size(info.map_width));
-	p.Send_uint32(encode_map_size(info.map_height));
+	p.Send_uint16(encode_map_size(info.map_width));
+	p.Send_uint16(encode_map_size(info.map_height));
 	p.Send_uint8 (to_underlying(info.landscape));
 	p.Send_bool  (info.dedicated);
 }
@@ -283,15 +283,15 @@ void SerializeNetworkGameInfoExtended(Packet &p, const NetworkServerGameInfo &in
 
 	p.Send_uint32(info.calendar_date.base());
 	p.Send_uint32(info.calendar_start.base());
-	p.Send_uint32 (info.companies_max);
-	p.Send_uint32 (info.companies_on);
-	p.Send_uint32 (info.clients_max); // Used to be max-spectators
+	p.Send_uint16 (info.companies_max);
+	p.Send_uint16 (info.companies_on);
+	p.Send_uint16 (info.clients_max); // Used to be max-spectators
 	p.Send_string(info.server_name);
 	p.Send_string(info.server_revision);
 	p.Send_uint8 (0); // Used to be server-lang.
 	p.Send_bool  (info.use_password);
-	p.Send_uint32 (info.clients_max);
-	p.Send_uint32 (info.clients_on);
+	p.Send_uint16 (info.clients_max);
+	p.Send_uint16 (info.clients_on);
 	p.Send_uint16 (info.spectators_on);
 	p.Send_string(""); // Used to be map-name.
 	p.Send_uint32(info.map_width);
@@ -410,14 +410,14 @@ void DeserializeNetworkGameInfo(Packet &p, NetworkGameInfo &info, const GameInfo
 		}
 
 		case 3:
-			info.calendar_date  = CalTime::DeserialiseDateClamped(p.Recv_uint32());
-			info.calendar_start = CalTime::DeserialiseDateClamped(p.Recv_uint32());
+			info.calendar_date  = CalTime::DeserialiseDateClamped(p.Recv_uint16());
+			info.calendar_start = CalTime::DeserialiseDateClamped(p.Recv_uint16());
 			[[fallthrough]];
 
 		case 2:
-			info.companies_max  = p.Recv_uint32 ();
-			info.companies_on   = p.Recv_uint32 ();
-			p.Recv_uint32(); // Used to contain max-spectators.
+			info.companies_max  = p.Recv_uint16 ();
+			info.companies_on   = p.Recv_uint16 ();
+			p.Recv_uint16(); // Used to contain max-spectators.
 			[[fallthrough]];
 
 		case 1:
@@ -425,9 +425,9 @@ void DeserializeNetworkGameInfo(Packet &p, NetworkGameInfo &info, const GameInfo
 			info.server_revision = p.Recv_string(NETWORK_REVISION_LENGTH);
 			if (game_info_version < 6) p.Recv_uint8 (); // Used to contain server-lang.
 			info.use_password   = p.Recv_bool  ();
-			info.clients_max    = p.Recv_uint32 ();
-			info.clients_on     = p.Recv_uint32 ();
-			info.spectators_on  = p.Recv_uint32 ();
+			info.clients_max    = p.Recv_uint16 ();
+			info.clients_on     = p.Recv_uint16 ();
+			info.spectators_on  = p.Recv_uint16 ();
 			if (game_info_version < 3) { // 16 bits dates got scrapped and are read earlier
 				info.calendar_date  = CalTime::DAYS_TILL_ORIGINAL_BASE_YEAR + p.Recv_uint16();
 				info.calendar_start = CalTime::DAYS_TILL_ORIGINAL_BASE_YEAR + p.Recv_uint16();
@@ -441,8 +441,8 @@ void DeserializeNetworkGameInfo(Packet &p, NetworkGameInfo &info, const GameInfo
 					return in;
 				}
 			};
-			info.map_width      = decode_map_size(p.Recv_uint32());
-			info.map_height     = decode_map_size(p.Recv_uint32());
+			info.map_width      = decode_map_size(p.Recv_uint16());
+			info.map_height     = decode_map_size(p.Recv_uint16());
 
 			info.landscape      = LandscapeType{p.Recv_uint8()};
 			info.dedicated      = p.Recv_bool  ();
@@ -465,16 +465,16 @@ void DeserializeNetworkGameInfoExtended(Packet &p, NetworkGameInfo &info)
 
 	info.calendar_date  = CalTime::DeserialiseDateClamped(p.Recv_uint32());
 	info.calendar_start = CalTime::DeserialiseDateClamped(p.Recv_uint32());
-	info.companies_max  = p.Recv_uint32 ();
-	info.companies_on   = p.Recv_uint32 ();
-	p.Recv_uint32(); // Used to contain max-spectators.
+	info.companies_max  = p.Recv_uint16 ();
+	info.companies_on   = p.Recv_uint16 ();
+	p.Recv_uint16(); // Used to contain max-spectators.
 	info.server_name = p.Recv_string(NETWORK_NAME_LENGTH);
 	info.server_revision = p.Recv_string(NETWORK_LONG_REVISION_LENGTH);
 	p.Recv_uint8 (); // Used to contain server-lang.
 	info.use_password   = p.Recv_bool  ();
-	info.clients_max    = p.Recv_uint32 ();
-	info.clients_on     = p.Recv_uint32 ();
-	info.spectators_on  = p.Recv_uint32 ();
+	info.clients_max    = p.Recv_uint16 ();
+	info.clients_on     = p.Recv_uint16 ();
+	info.spectators_on  = p.Recv_uint16 ();
 	while (p.Recv_uint8() != 0) {} // Used to contain the map-name.
 	info.map_width      = p.Recv_uint32();
 	info.map_height     = p.Recv_uint32();
