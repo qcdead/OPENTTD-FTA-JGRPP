@@ -398,7 +398,7 @@ static std::string _password_server_id;
 static std::string _company_password_server_id;
 
 /** Maximum number of companies of the currently joined server. */
-static uint32_t _network_server_max_companies;
+static uint16_t _network_server_max_companies;
 /** The current name of the server you are on. */
 std::string _network_server_name;
 
@@ -1419,7 +1419,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::Receive_SERVER_CONFIG_UPDATE(P
 {
 	if (this->status < STATUS_ACTIVE) return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 
-	_network_server_max_companies = p.Recv_uint32();
+	_network_server_max_companies = p.Recv_uint16();
 	_network_server_name = p.Recv_string(NETWORK_NAME_LENGTH);
 
 	InvalidateWindowData(WC_CLIENT_LIST, 0);
