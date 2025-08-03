@@ -1,3 +1,5 @@
+A custom version of OpenTTD for the Freeport Transit Authority group, based upon [JGR's Patchpack version 0.65.4](https://github.com/JGRennison/OpenTTD-patches) with modifications from [OpenTTD-Spiffing](https://github.com/TheSpiffingUnpaidIntern/OpenTTD-Spiffing)
+
 ## JGR's Patchpack version 0.65.4
 
 This is a collection of features and other modifications applied to [OpenTTD](http://www.openttd.org/).  
