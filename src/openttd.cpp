@@ -295,7 +295,7 @@ static void WriteSavegameInfo(const char *name)
 	}
 	for (size_t i = 0; i < XSLFI_SIZE; i++) {
 		if (_sl_xv_feature_versions[i] > 0) {
-			buffer.format("    Feature: {} = {}\n", SlXvGetFeatureName((SlXvFeatureIndex) i), _sl_xv_feature_versions[i]);
+			buffer.format("    Feature: {} = {}\n", SlXvGetFeatureName((SlXvFeatureIndex)i), _sl_xv_feature_versions[i]);
 		}
 	}
 	buffer.format("NewGRF ver:   0x{:08X}\n", last_ottd_rev);
@@ -377,7 +377,7 @@ static void ParseResolution(Dimension *res, const char *s)
 		return;
 	}
 
-	res->width  = std::max(std::strtoul(s, nullptr, 0), 64UL);
+	res->width = std::max(std::strtoul(s, nullptr, 0), 64UL);
 	res->height = std::max(std::strtoul(t + 1, nullptr, 0), 64UL);
 }
 
@@ -444,12 +444,12 @@ static void ShutdownGame()
 	UninitializeCompanies();
 
 	_loaded_local_company = COMPANY_SPECTATOR;
-	_game_events_since_load = (GameEventFlags) 0;
-	_game_events_overall = (GameEventFlags) 0;
+	_game_events_since_load = (GameEventFlags)0;
+	_game_events_overall = (GameEventFlags)0;
 	_game_load_cur_date_ymd = { EconTime::Year{0}, 0, 0 };
 	_game_load_date_fract = 0;
 	_game_load_tick_skip_counter = 0;
-	_game_load_state_ticks = StateTicks{0};
+	_game_load_state_ticks = StateTicks{ 0 };
 	_game_load_time = 0;
 	_extra_aspects = 0;
 	_aspect_cfg_hash = 0;
@@ -668,7 +668,7 @@ static std::vector<OptionData> CreateOptions()
  * @param arguments The command line arguments passed to the application.
  * @return 0 when there is no error.
  */
-int openttd_main(std::span<char * const> arguments)
+int openttd_main(std::span<char *const> arguments)
 {
 	SetSelfAsMainThread();
 	PerThreadSetup(false);
@@ -684,7 +684,7 @@ int openttd_main(std::span<char * const> arguments)
 	std::string graphics_set;
 	std::string sounds_set;
 	std::string music_set;
-	Dimension resolution = {0, 0};
+	Dimension resolution = { 0, 0 };
 	std::unique_ptr<AfterNewGRFScan> scanner = std::make_unique<AfterNewGRFScan>();
 	bool dedicated = false;
 	bool only_local_path = false;
@@ -702,143 +702,147 @@ int openttd_main(std::span<char * const> arguments)
 	int i;
 	while ((i = mgo.GetOpt()) != -1) {
 		switch (i) {
-		case 'I': graphics_set = mgo.opt; break;
-		case 'S': sounds_set = mgo.opt; break;
-		case 'M': music_set = mgo.opt; break;
-		case 'm': musicdriver = mgo.opt; break;
-		case 's': sounddriver = mgo.opt; break;
-		case 'v': videodriver = mgo.opt; break;
-		case 'b': blitter = mgo.opt; break;
-		case 'D':
-			musicdriver = "null";
-			sounddriver = "null";
-			videodriver = "dedicated";
-			blitter = "null";
-			dedicated = true;
-			SetDebugString("net=3", [](std::string err) { ShowInfoI(err); });
-			if (mgo.opt != nullptr) {
-				scanner->dedicated_host = ParseFullConnectionString(mgo.opt, scanner->dedicated_port);
-			}
-			break;
-		case 'f': _dedicated_forks = true; break;
-		case 'n':
-			scanner->connection_string = mgo.opt; // host:port#company parameter
-			break;
-		case 'p':
-			scanner->join_server_password = mgo.opt;
-			break;
-		case 'P':
-			scanner->join_company_password = mgo.opt;
-			break;
-		case 'r': ParseResolution(&resolution, mgo.opt); break;
-		case 't': scanner->startyear = CalTime::Year(atoi(mgo.opt)); break;
-		case 'd': {
+			case 'I': graphics_set = mgo.opt; break;
+			case 'S': sounds_set = mgo.opt; break;
+			case 'M': music_set = mgo.opt; break;
+			case 'm': musicdriver = mgo.opt; break;
+			case 's': sounddriver = mgo.opt; break;
+			case 'v': videodriver = mgo.opt; break;
+			case 'b': blitter = mgo.opt; break;
+			case 'D':
+				musicdriver = "null";
+				sounddriver = "null";
+				videodriver = "dedicated";
+				blitter = "null";
+				dedicated = true;
+				SetDebugString("net=3", [](std::string err) { ShowInfoI(err); });
+				if (mgo.opt != nullptr) {
+					scanner->dedicated_host = ParseFullConnectionString(mgo.opt, scanner->dedicated_port);
+				}
+				break;
+			case 'f': _dedicated_forks = true; break;
+			case 'n':
+				scanner->connection_string = mgo.opt; // host:port#company parameter
+				break;
+			case 'p':
+				scanner->join_server_password = mgo.opt;
+				break;
+			case 'P':
+				scanner->join_company_password = mgo.opt;
+				break;
+			case 'r': ParseResolution(&resolution, mgo.opt); break;
+			case 't': scanner->startyear = CalTime::Year(atoi(mgo.opt)); break;
+			case 'd':
+			{
 #if defined(_WIN32)
 				CreateConsole();
 #endif
 				if (mgo.opt != nullptr) SetDebugString(mgo.opt, [](std::string err) { ShowInfoI(err); });
 				break;
 			}
-		case 'e':
-			/* Allow for '-e' before or after '-g'. */
-			switch (_switch_mode) {
-				case SM_MENU: _switch_mode = SM_EDITOR; break;
-				case SM_LOAD_GAME: _switch_mode = SM_LOAD_SCENARIO; break;
-				case SM_START_HEIGHTMAP: _switch_mode = SM_LOAD_HEIGHTMAP; break;
-				default: break;
-			}
-			break;
-		case 'g':
-			if (mgo.opt != nullptr) {
-				_file_to_saveload.name = mgo.opt;
-
-				/* if the file doesn't exist or it is not a valid savegame, let the saveload code show an error */
-				std::string extension;
-				auto t = _file_to_saveload.name.find_last_of('.');
-				if (t != std::string::npos) {
-					extension = _file_to_saveload.name.substr(t);
-				}
-				FiosType ft = FiosGetSavegameListCallback(SLO_LOAD, _file_to_saveload.name, extension.c_str(), nullptr, nullptr);
-				if (ft == FIOS_TYPE_INVALID) {
-					ft = FiosGetScenarioListCallback(SLO_LOAD, _file_to_saveload.name, extension.c_str(), nullptr, nullptr);
-				}
-				if (ft == FIOS_TYPE_INVALID) {
-					ft = FiosGetHeightmapListCallback(SLO_LOAD, _file_to_saveload.name, extension.c_str(), nullptr, nullptr);
-				}
-
+			case 'e':
 				/* Allow for '-e' before or after '-g'. */
-				switch (GetAbstractFileType(ft)) {
-					case FT_SAVEGAME: _switch_mode = (_switch_mode == SM_EDITOR ? SM_LOAD_SCENARIO : SM_LOAD_GAME); break;
-					case FT_SCENARIO: _switch_mode = (_switch_mode == SM_EDITOR ? SM_LOAD_SCENARIO : SM_LOAD_GAME); break;
-					case FT_HEIGHTMAP: _switch_mode = (_switch_mode == SM_EDITOR ? SM_LOAD_HEIGHTMAP : SM_START_HEIGHTMAP); break;
+				switch (_switch_mode) {
+					case SM_MENU: _switch_mode = SM_EDITOR; break;
+					case SM_LOAD_GAME: _switch_mode = SM_LOAD_SCENARIO; break;
+					case SM_START_HEIGHTMAP: _switch_mode = SM_LOAD_HEIGHTMAP; break;
 					default: break;
 				}
-
-				_file_to_saveload.SetMode(SLO_LOAD, GetAbstractFileType(ft), GetDetailedFileType(ft));
 				break;
-			}
+			case 'g':
+				if (mgo.opt != nullptr) {
+					_file_to_saveload.name = mgo.opt;
 
-			_switch_mode = SM_NEWGAME;
-			/* Give a random map if no seed has been given */
-			if (scanner->generation_seed == GENERATE_NEW_SEED) {
-				scanner->generation_seed = InteractiveRandom();
-			}
-			break;
-		case 'q':
-		case 'K': {
-			DeterminePaths(arguments[0], only_local_path);
-			if (StrEmpty(mgo.opt)) {
-				ret = 1;
-				return ret;
-			}
+					/* if the file doesn't exist or it is not a valid savegame, let the saveload code show an error */
+					std::string extension;
+					auto t = _file_to_saveload.name.find_last_of('.');
+					if (t != std::string::npos) {
+						extension = _file_to_saveload.name.substr(t);
+					}
+					FiosType ft = FiosGetSavegameListCallback(SLO_LOAD, _file_to_saveload.name, extension.c_str(), nullptr, nullptr);
+					if (ft == FIOS_TYPE_INVALID) {
+						ft = FiosGetScenarioListCallback(SLO_LOAD, _file_to_saveload.name, extension.c_str(), nullptr, nullptr);
+					}
+					if (ft == FIOS_TYPE_INVALID) {
+						ft = FiosGetHeightmapListCallback(SLO_LOAD, _file_to_saveload.name, extension.c_str(), nullptr, nullptr);
+					}
 
-			char title[80];
-			title[0] = '\0';
-			FiosGetSavegameListCallback(SLO_LOAD, mgo.opt, strrchr(mgo.opt, '.'), title, lastof(title));
+					/* Allow for '-e' before or after '-g'. */
+					switch (GetAbstractFileType(ft)) {
+						case FT_SAVEGAME: _switch_mode = (_switch_mode == SM_EDITOR ? SM_LOAD_SCENARIO : SM_LOAD_GAME); break;
+						case FT_SCENARIO: _switch_mode = (_switch_mode == SM_EDITOR ? SM_LOAD_SCENARIO : SM_LOAD_GAME); break;
+						case FT_HEIGHTMAP: _switch_mode = (_switch_mode == SM_EDITOR ? SM_LOAD_HEIGHTMAP : SM_START_HEIGHTMAP); break;
+						default: break;
+					}
 
-			_load_check_data.Clear();
-			if (i == 'K') _load_check_data.want_debug_data = true;
-			_load_check_data.want_grf_compatibility = false;
-			SaveOrLoadResult res = SaveOrLoad(mgo.opt, SLO_CHECK, DFT_GAME_FILE, SAVE_DIR, false);
-			if (res != SL_OK || _load_check_data.HasErrors()) {
-				fprintf(stderr, "Failed to open savegame\n");
-				if (_load_check_data.HasErrors()) {
-					InitializeLanguagePacks(); // A language pack is needed for GetString()
-					format_buffer buf;
-					SetDParamStr(0, _load_check_data.error_msg);
-					AppendStringInPlace(buf, _load_check_data.error);
-					buf.push_back('\n');
-					fwrite(buf.data(), 1, buf.size(), stderr);
+					_file_to_saveload.SetMode(SLO_LOAD, GetAbstractFileType(ft), GetDetailedFileType(ft));
+					break;
+				}
+
+				_switch_mode = SM_NEWGAME;
+				/* Give a random map if no seed has been given */
+				if (scanner->generation_seed == GENERATE_NEW_SEED) {
+					scanner->generation_seed = InteractiveRandom();
+				}
+				break;
+			case 'q':
+			case 'K':
+			{
+				DeterminePaths(arguments[0], only_local_path);
+				if (StrEmpty(mgo.opt)) {
+					ret = 1;
+					return ret;
+				}
+
+				char title[80];
+				title[0] = '\0';
+				FiosGetSavegameListCallback(SLO_LOAD, mgo.opt, strrchr(mgo.opt, '.'), title, lastof(title));
+
+				_load_check_data.Clear();
+				if (i == 'K') _load_check_data.want_debug_data = true;
+				_load_check_data.want_grf_compatibility = false;
+				SaveOrLoadResult res = SaveOrLoad(mgo.opt, SLO_CHECK, DFT_GAME_FILE, SAVE_DIR, false);
+				if (res != SL_OK || _load_check_data.HasErrors()) {
+					fprintf(stderr, "Failed to open savegame\n");
+					if (_load_check_data.HasErrors()) {
+						InitializeLanguagePacks(); // A language pack is needed for GetString()
+						format_buffer buf;
+						SetDParamStr(0, _load_check_data.error_msg);
+						AppendStringInPlace(buf, _load_check_data.error);
+						buf.push_back('\n');
+						fwrite(buf.data(), 1, buf.size(), stderr);
+					}
+					return ret;
+				}
+
+				if (i == 'q') {
+					WriteSavegameInfo(title);
+				} else {
+					WriteSavegameDebugData(title);
 				}
 				return ret;
 			}
-
-			if (i == 'q') {
-				WriteSavegameInfo(title);
-			} else {
-				WriteSavegameDebugData(title);
+			case 'Q':
+			{
+				extern int _skip_all_newgrf_scanning;
+				_skip_all_newgrf_scanning += 1;
+				break;
 			}
-			return ret;
-		}
-		case 'Q': {
-			extern int _skip_all_newgrf_scanning;
-			_skip_all_newgrf_scanning += 1;
-			break;
-		}
-		case 'G': scanner->generation_seed = std::strtoul(mgo.opt, nullptr, 10); break;
-		case 'c': _config_file = mgo.opt; break;
-		case 'x': scanner->save_config = false; break;
-		case 'J': _quit_after_days = Clamp(atoi(mgo.opt), 0, INT_MAX); break;
-		case 'Z': {
-			format_buffer buffer;
-			CrashLog::VersionInfoLog(buffer);
-			fwrite(buffer.data(), 1, buffer.size(), stdout);
-			return ret;
-		}
-		case 'X': only_local_path = true; break;
-		case 'h':
-			i = -2; // Force printing of help.
-			break;
+			case 'G': scanner->generation_seed = std::strtoul(mgo.opt, nullptr, 10); break;
+			case 'c': _config_file = mgo.opt; break;
+			case 'x': scanner->save_config = false; break;
+			case 'J': _quit_after_days = Clamp(atoi(mgo.opt), 0, INT_MAX); break;
+			case 'Z':
+			{
+				format_buffer buffer;
+				CrashLog::VersionInfoLog(buffer);
+				fwrite(buffer.data(), 1, buffer.size(), stdout);
+				return ret;
+			}
+			case 'X': only_local_path = true; break;
+			case 'h':
+				i = -2; // Force printing of help.
+				break;
 		}
 		if (i == -2) break;
 	}
@@ -877,7 +881,7 @@ int openttd_main(std::span<char * const> arguments)
 	 * integer, This way all internal drawing routines work correctly.
 	 * A resolution that has one component as 0 is treated as a marker to
 	 * auto-detect a good window size. */
-	_cur_resolution.width  = std::min(_cur_resolution.width, UINT16_MAX / 2u);
+	_cur_resolution.width = std::min(_cur_resolution.width, UINT16_MAX / 2u);
 	_cur_resolution.height = std::min(_cur_resolution.height, UINT16_MAX / 2u);
 
 	/* Assume the cursor starts within the game as not all video drivers
@@ -1370,7 +1374,8 @@ void SwitchToMode(SwitchMode new_mode)
 			UpdateSocialIntegration(GM_NORMAL);
 			break;
 
-		case SM_LOAD_GAME: { // Load game, Play Scenario
+		case SM_LOAD_GAME:
+		{ // Load game, Play Scenario
 			ResetGRFConfig(true);
 			ResetWindowSystem();
 
@@ -1410,7 +1415,8 @@ void SwitchToMode(SwitchMode new_mode)
 			UpdateSocialIntegration(GM_EDITOR);
 			break;
 
-		case SM_LOAD_SCENARIO: { // Load scenario from scenario editor
+		case SM_LOAD_SCENARIO:
+		{ // Load scenario from scenario editor
 			if (SafeLoad(_file_to_saveload.name, _file_to_saveload.file_op, _file_to_saveload.detail_ftype, GM_EDITOR, NO_DIRECTORY)) {
 				SetLocalCompany(OWNER_NONE);
 				GenerateSavegameId();
@@ -1450,8 +1456,9 @@ void SwitchToMode(SwitchMode new_mode)
 			UpdateSocialIntegration(GM_MENU);
 			break;
 
-		case SM_SAVE_GAME: { // Save game.
-			/* Make network saved games on pause compatible to singleplayer mode */
+		case SM_SAVE_GAME:
+		{ // Save game.
+/* Make network saved games on pause compatible to singleplayer mode */
 			SaveModeFlags flags = SMF_NONE;
 			if (_game_mode == GM_EDITOR) flags |= SMF_SCENARIO;
 			if (SaveOrLoad(_file_to_saveload.name, SLO_SAVE, DFT_GAME_FILE, NO_DIRECTORY, true, flags) != SL_OK) {
@@ -1688,8 +1695,7 @@ static void DoAutosave()
 }
 
 /** Interval for regular autosaves. Initialized at zero to disable till settings are loaded. */
-static IntervalTimer<TimerGameRealtime> _autosave_interval({std::chrono::milliseconds::zero(), TimerGameRealtime::AUTOSAVE}, [](auto)
-{
+static IntervalTimer<TimerGameRealtime> _autosave_interval({ std::chrono::milliseconds::zero(), TimerGameRealtime::AUTOSAVE }, [](auto) {
 	/* We reset the command-during-pause mode here, so we don't continue
 	 * to make auto-saves when nothing more is changing. */
 	_pause_mode &= ~PM_COMMAND_DURING_PAUSE;
@@ -1712,7 +1718,7 @@ static IntervalTimer<TimerGameRealtime> _autosave_interval({std::chrono::millise
 void ChangeAutosaveFrequency(bool reset)
 {
 	std::chrono::minutes interval = _settings_client.gui.autosave_realtime ? std::chrono::minutes(_settings_client.gui.autosave_interval) : std::chrono::minutes::zero();
-	_autosave_interval.SetInterval({interval, TimerGameRealtime::AUTOSAVE}, reset);
+	_autosave_interval.SetInterval({ interval, TimerGameRealtime::AUTOSAVE }, reset);
 }
 
 /**

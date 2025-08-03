@@ -179,8 +179,8 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendWelcome()
 	p->Send_uint32(_settings_game.game_creation.generation_seed);
 	p->Send_uint8 (to_underlying(_settings_game.game_creation.landscape));
 	p->Send_uint32(CalTime::ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1).base());
-	p->Send_uint16(Map::SizeX());
-	p->Send_uint16(Map::SizeY());
+	p->Send_uint8(Map::SizeX());
+	p->Send_uint8(Map::SizeY());
 
 	this->SendPacket(std::move(p));
 

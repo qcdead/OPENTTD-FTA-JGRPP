@@ -145,6 +145,8 @@ public:
 			Debug(misc, LANDINFOD_LEVEL, "m6     = {:#x}", _me[tile].m6);
 			Debug(misc, LANDINFOD_LEVEL, "m7     = {:#x}", _me[tile].m7);
 			Debug(misc, LANDINFOD_LEVEL, "m8     = {:#x}", _me[tile].m8);
+			Debug(misc, LANDINFOD_LEVEL, "m9     = {:#x}", _me[tile].m9);
+			Debug(misc, LANDINFOD_LEVEL, "m10     = {:#x}", _me[tile].m10);
 
 			PrintWaterRegionDebugInfo(tile);
 		}
