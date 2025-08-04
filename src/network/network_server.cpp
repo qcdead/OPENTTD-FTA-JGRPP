@@ -1762,7 +1762,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::Receive_CLIENT_MOVE(Packet &p)
 {
 	if (this->status != STATUS_ACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
-	CompanyID company_id = (Owner)p.Recv_uint32();
+	CompanyID company_id = (Owner)p.Recv_uint16();
 
 	/* Check if the company is valid, we don't allow moving to AI companies */
 	if (company_id != COMPANY_SPECTATOR && !Company::IsValidHumanID(company_id)) return NETWORK_RECV_STATUS_OKAY;
