@@ -19,8 +19,8 @@
 enum Owner : uint16_t {
 	/* All companies below MAX_COMPANIES are playable
 	 * companies, above, they are special, computer controlled 'companies' */
-	OWNER_BEGIN     = 0x00, ///< First owner
-	COMPANY_FIRST   = 0x00, ///< First company, same as owner
+	OWNER_BEGIN     = 0x000, ///< First owner
+	COMPANY_FIRST   = 0x000, ///< First company, same as owner
 	MAX_COMPANIES   = 0x1F5, ///< Maximum number of companies
 	OLD_MAX_COMPANIES   = 0x0F, ///< Maximum number of companies
 	OWNER_TOWN      = 0x20F, ///< A town owns the tile, or a town is expanding
@@ -51,9 +51,9 @@ static const uint MAX_COMPETITORS_INTERVAL = 500; ///< The maximum interval (in 
 
 typedef Owner CompanyID;
 
-class CompanyMask : public BaseBitSet<CompanyMask, CompanyID, uint16_t> {
+class CompanyMask : public BaseBitSet<CompanyMask, CompanyID, uint32_t> {
 public:
-	constexpr CompanyMask() : BaseBitSet<CompanyMask, CompanyID, uint16_t>() {}
+	constexpr CompanyMask() : BaseBitSet<CompanyMask, CompanyID, uint32_t>() {}
 	static constexpr size_t DecayValueType(CompanyID value) { return to_underlying(value); }
 
 	constexpr auto operator <=>(const CompanyMask &) const noexcept = default;

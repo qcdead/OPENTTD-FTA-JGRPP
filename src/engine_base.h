@@ -99,7 +99,9 @@ struct Engine : EnginePool::PoolItem<&_engine_pool> {
 
 	std::unique_ptr<EngineRefitCapacityValue, FreeDeleter> refit_capacity_values;
 
-	Engine() {}
+	Engine()
+	{
+	}
 	Engine(VehicleType type, uint16_t local_id);
 	bool IsEnabled() const;
 
@@ -207,7 +209,10 @@ struct Engine : EnginePool::PoolItem<&_engine_pool> {
 	struct EngineTypeFilter {
 		VehicleType vt;
 
-		bool operator() (size_t index) { return Engine::Get(index)->type == this->vt; }
+		bool operator() (size_t index)
+		{
+			return Engine::Get(index)->type == this->vt;
+		}
 	};
 
 	/**
